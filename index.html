@@ -546,6 +546,18 @@ Capabilities & Instructions:
                     }, '*');
                 };
 
+                const handleGoToFinancials = (e) => {
+                    e.stopPropagation();
+                    if (!project.projNumber) {
+                        alert("Project number is missing for this card.");
+                        return;
+                    }
+                    window.postMessage({
+                        type: 'GO_TO_DASHBOARD',
+                        projectNumber: project.projNumber
+                    }, '*');
+                };
+
                 const handleScrapeTeam = (e) => {
                     e.stopPropagation();
                     if (!project.projNumber) {
@@ -632,6 +644,15 @@ Capabilities & Instructions:
                                     >
                                         <div className="bg-[#800000] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1">
                                             ISERVE
+                                        </div>
+                                    </button>
+                                    <button
+                                        onClick={handleGoToFinancials}
+                                        className="p-1 bg-slate-50 hover:bg-emerald-50 border border-slate-100 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+                                        title="Go to Financials"
+                                    >
+                                        <div className="bg-[#10b981] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1 uppercase">
+                                            Financials
                                         </div>
                                     </button>
                                 </div>

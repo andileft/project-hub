@@ -1068,6 +1068,17 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
         }, '*');
     };
 
+    const handleGoToFinancials = () => {
+        if (!project.projNumber) {
+            alert("Project number is missing for this card.");
+            return;
+        }
+        window.postMessage({
+            type: 'GO_TO_DASHBOARD',
+            projectNumber: project.projNumber
+        }, '*');
+    };
+
     return (
         <div className={`bg-white rounded-xl border border-slate-200 border-l-4 ${statusStyle.border} p-5 hover:shadow-md transition-all group relative overflow-hidden flex flex-col gap-4`}>
             <div className="flex flex-col lg:flex-row lg:items-start gap-6">
@@ -1150,6 +1161,15 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
                         >
                             <div className="bg-[#800000] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1">
                                 <Timer size={10} /> ISERVE
+                            </div>
+                        </button>
+                        <button
+                            onClick={handleGoToFinancials}
+                            className="p-1 rounded-lg transition-all flex items-center justify-center hover:bg-emerald-50 border border-slate-100 rounded-lg shadow-sm"
+                            title="Go to Financials"
+                        >
+                            <div className="bg-[#10b981] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1 uppercase">
+                                Financials
                             </div>
                         </button>
                     </div>
