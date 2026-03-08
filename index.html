@@ -1440,7 +1440,8 @@ Capabilities & Instructions:
                         const matchesPM = filters.pm === 'All' || project.pm === filters.pm;
                         const matchesCustomer = filters.customer === 'All' || project.customer === filters.customer;
                         const matchesSolution = filters.solution === 'All' || project.solusi === filters.solution;
-                        const matchesMethodology = filters.methodology === 'All' || (project.methodology || 'BAST Only') === filters.methodology;
+                        const matchesMethodology = filters.methodology === 'All' ||
+                            (filters.methodology === 'Tracked by EPM' ? (project.methodology === 'Simple' || project.methodology === 'Complex') : (project.methodology || 'BAST Only') === filters.methodology);
                         let matchesYear = true;
                         if (filters.year !== 'All' && project.start) matchesYear = new Date(project.start).getFullYear().toString() === filters.year;
                         return matchesSearch && matchesStatus && matchesPM && matchesYear && matchesCustomer && matchesSolution && matchesMethodology;
@@ -1583,6 +1584,7 @@ Capabilities & Instructions:
                                             <label className="filter-label">Methodology</label>
                                             <select className="filter-input" value={filters.methodology} onChange={(e) => setFilters({ ...filters, methodology: e.target.value })}>
                                                 <option value="All">All Types</option>
+                                                <option value="Tracked by EPM">Tracked by EPM</option>
                                                 <option value="BAST Only">BAST Only</option>
                                                 <option value="Simple">Simple</option>
                                                 <option value="Complex">Complex</option>
