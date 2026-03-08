@@ -1184,9 +1184,11 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
                 <div className="mt-2 pt-3 border-t border-slate-100">
                     <div className="flex items-start gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100 group-hover:bg-indigo-50/50 group-hover:border-indigo-100 transition-all">
                         <StickyNote size={14} className="text-slate-400 mt-0.5 shrink-0" />
-                        <div className="space-y-1">
+                        <div className="space-y-1 flex-1 min-w-0">
                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Recent Status Update</p>
-                            <p className="text-xs text-slate-600 leading-relaxed italic">"{project.note}"</p>
+                            <div className="max-h-24 overflow-y-auto pr-1">
+                                <p className="text-xs text-slate-600 leading-relaxed italic whitespace-pre-wrap">"{project.note}"</p>
+                            </div>
                         </div>
                     </div>
                 </div>
