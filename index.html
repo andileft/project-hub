@@ -462,6 +462,10 @@ Capabilities & Instructions:
                 const [showTeam, setShowTeam] = useState(false);
                 const [team, setTeam] = useState([]);
                 const [loadingTeam, setLoadingTeam] = useState(false);
+                const [showFinancials, setShowFinancials] = useState(false);
+                const [financials, setFinancials] = useState([]);
+                const [loadingFinancials, setLoadingFinancials] = useState(false);
+                const [lastUpdatedFinancials, setLastUpdatedFinancials] = useState(null);
                 const [letters, setLetters] = useState({});
 
                 const fetchTeam = async (e) => {
@@ -570,6 +574,76 @@ Capabilities & Instructions:
                     }, '*');
                 };
 
+                const handleScrapeFinancials = (e) => {
+                    e.stopPropagation();
+                    if (!project.projNumber) {
+                        alert("Project number is missing for this card.");
+                        return;
+                    }
+                    window.postMessage({
+                        type: 'GO_TO_FINANCIALS_SCRAPE',
+                        projectNumber: project.projNumber
+                    }, '*');
+                };
+
+                const fetchFinancials = async (e) => {
+                    if (e) e.stopPropagation();
+                    if (showFinancials) {
+                        setShowFinancials(false);
+                        return;
+                    }
+                    setLoadingFinancials(true);
+                    try {
+                        const financialsRef = collection(db, COLLECTION_PATH, project.id, 'financials');
+                        const snapshot = await getDocs(financialsRef);
+                        const financialsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                        // Find latest updatedAt
+                        let latest = null;
+                        financialsData.forEach(item => {
+                            if (item.updatedAt) {
+                                try {
+                                    // Handle Firestore Timestamp or string
+                                    const d = item.updatedAt.toDate ? item.updatedAt.toDate() : new Date(item.updatedAt);
+                                    if (!latest || d > latest) latest = d;
+                                } catch (e) {
+                                    console.warn("Invalid date:", item.updatedAt);
+                                }
+                            }
+                        });
+                        setLastUpdatedFinancials(latest);
+
+                        // Group and Total by WBS
+                        const grouped = financialsData.reduce((acc, curr) => {
+                            const wbs = curr.wbs || 'No WBS';
+                            if (!acc[wbs]) {
+                                acc[wbs] = {
+                                    wbs,
+                                    costPlan: 0,
+                                    costCommit: 0,
+                                    costActual: 0,
+                                    availableBudget: 0,
+                                    items: []
+                                };
+                            }
+                            acc[wbs].costPlan += Number(curr.costPlan || 0);
+                            acc[wbs].costCommit += Number(curr.costCommit || 0);
+                            acc[wbs].costActual += Number(curr.costActual || 0);
+                            acc[wbs].availableBudget += Number(curr.availableBudget || 0);
+                            acc[wbs].items.push(curr);
+                            return acc;
+                        }, {});
+
+                        setFinancials(Object.values(grouped));
+                        setShowFinancials(true);
+                    } catch (error) {
+                        console.error("Error fetching financials:", error);
+                        alert("Failed to fetch financials data.");
+                    } finally {
+                        setLoadingFinancials(false);
+                    }
+                };
+
                 return (
                     <div onClick={() => onEdit(project)} className={`bg-white rounded-xl border border-slate-200 border-l-4 ${statusStyle.border} p-5 hover:shadow-md transition-all group relative overflow-hidden flex flex-col gap-4 cursor-pointer`}>
                         <div className="flex flex-col lg:flex-row lg:items-start gap-6">
@@ -622,6 +696,13 @@ Capabilities & Instructions:
                                         title="View Team"
                                     >
                                         {loadingTeam ? <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>}
+                                    </button>
+                                    <button
+                                        onClick={fetchFinancials}
+                                        className={`p-2 rounded-lg transition-all flex items-center justify-center gap-1 flex-1 lg:flex-none ${showFinancials ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-50 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-100'}`}
+                                        title="View Financials"
+                                    >
+                                        {loadingFinancials ? <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-banknote"><rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>}
                                     </button>
                                     <button
                                         onClick={handleGoToCpc}
@@ -701,6 +782,81 @@ Capabilities & Instructions:
                             <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 bg-gradient-to-l from-white via-white to-transparent pl-8">
                                 <button onClick={(e) => { e.stopPropagation(); onEdit(project); }} className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-all shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></svg></button>
                                 <button onClick={(e) => { e.stopPropagation(); onDelete(project.id); }} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg></button>
+                            </div>
+                        )}
+                        {showFinancials && (
+                            <div className="mt-4 pt-4 border-t border-slate-100 overflow-x-auto" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-banknote text-emerald-500"><rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>
+                                            Project Financials (Mio IDR)
+                                        </h4>
+                                        {lastUpdatedFinancials && (
+                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${(new Date() - lastUpdatedFinancials) / (1000 * 60 * 60 * 24) > 7
+                                                    ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                                                    : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                                }`}>
+                                                Updated: {formatDisplayDate(lastUpdatedFinancials)}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={handleScrapeFinancials}
+                                            className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-tighter"
+                                            title="Scrape Financials from CPC"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5V19A9 3 0 0 0 21 19V5" /><path d="M3 12A9 3 0 0 0 21 12" /></svg>
+                                            Scrape Financials
+                                        </button>
+                                    )}
+                                </div>
+                                <table className="w-full text-left border-collapse min-w-[700px]">
+                                    <thead>
+                                        <tr className="bg-slate-50">
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">WBS</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">GL Account</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">Description</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Cost Plan</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Commitment</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Actual</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Available</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {financials.map(group => (
+                                            <React.Fragment key={group.wbs}>
+                                                {/* WBS Total Row */}
+                                                <tr className="bg-emerald-50/30 border-b border-emerald-50">
+                                                    <td className="px-3 py-2 text-[11px] font-black text-emerald-900 tabular-nums">{group.wbs}</td>
+                                                    <td colSpan="2" className="px-3 py-2 text-[11px] font-black text-emerald-900 italic uppercase tracking-tighter">WBS TOTAL</td>
+                                                    <td className="px-3 py-2 text-[11px] font-black text-emerald-900 text-right tabular-nums">{group.costPlan.toLocaleString('id-ID')}M</td>
+                                                    <td className="px-3 py-2 text-[11px] font-black text-emerald-900 text-right tabular-nums">{group.costCommit.toLocaleString('id-ID')}M</td>
+                                                    <td className="px-3 py-2 text-[11px] font-black text-emerald-900 text-right tabular-nums">{group.costActual.toLocaleString('id-ID')}M</td>
+                                                    <td className={`px-3 py-2 text-[11px] font-black text-right tabular-nums ${group.availableBudget < 0 ? 'text-red-600' : 'text-emerald-900'}`}>{group.availableBudget.toLocaleString('id-ID')}M</td>
+                                                </tr>
+                                                {/* Detail Rows */}
+                                                {group.items.map((item, idx) => (
+                                                    <tr key={`${group.wbs}-${idx}`} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
+                                                        <td className="px-3 py-2 text-[11px] text-slate-400 tabular-nums"></td>
+                                                        <td className="px-3 py-2 text-[11px] font-bold text-slate-600 tabular-nums">{item.glAccount}</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-700">{item.glAccountName}</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{item.costPlan.toLocaleString('id-ID')}M</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{item.costCommit.toLocaleString('id-ID')}M</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{item.costActual > 0 ? `${item.costActual.toLocaleString('id-ID')}M` : '-'}</td>
+                                                        <td className={`px-3 py-2 text-[11px] font-bold text-right tabular-nums ${item.availableBudget < 0 ? 'text-red-600' : 'text-slate-800'}`}>{item.availableBudget.toLocaleString('id-ID')}M</td>
+                                                    </tr>
+                                                ))}
+                                            </React.Fragment>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                {financials.length === 0 && !loadingFinancials && (
+                                    <div className="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">No financial data available</p>
+                                    </div>
+                                )}
                             </div>
                         )}
                         {showTeam && (

@@ -19,7 +19,8 @@ import {
     writeBatch,
     query,
     updateDoc,
-    getDocs
+    getDocs,
+    where
 } from 'firebase/firestore';
 import {
     getAuth,
@@ -995,6 +996,10 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
     const [showTeam, setShowTeam] = useState(false);
     const [team, setTeam] = useState([]);
     const [loadingTeam, setLoadingTeam] = useState(false);
+    const [showFinancials, setShowFinancials] = useState(false);
+    const [financials, setFinancials] = useState([]);
+    const [loadingFinancials, setLoadingFinancials] = useState(false);
+    const [lastUpdatedFinancials, setLastUpdatedFinancials] = useState(null);
 
     const fetchTeam = async () => {
         if (showTeam) {
@@ -1021,6 +1026,61 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
             alert("Failed to fetch team members. Please check connection.");
         } finally {
             setLoadingTeam(false);
+        }
+    };
+
+    const fetchFinancials = async () => {
+        if (showFinancials) {
+            setShowFinancials(false);
+            return;
+        }
+        setLoadingFinancials(true);
+        try {
+            const financialsRef = collection(db, 'artifacts', appId, 'public', 'data', 'projects', project.id, 'financials');
+            const snapshot = await getDocs(financialsRef);
+            const financialsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            // Find latest updatedAt
+            let latest = null;
+            financialsData.forEach(item => {
+                if (item.updatedAt) {
+                    try {
+                        const d = item.updatedAt.toDate ? item.updatedAt.toDate() : new Date(item.updatedAt);
+                        if (!latest || d > latest) latest = d;
+                    } catch (e) {
+                        console.warn("Invalid date:", item.updatedAt);
+                    }
+                }
+            });
+            setLastUpdatedFinancials(latest);
+
+            const grouped = financialsData.reduce((acc, curr) => {
+                const wbs = curr.wbs || 'No WBS';
+                if (!acc[wbs]) {
+                    acc[wbs] = {
+                        wbs,
+                        costPlan: 0,
+                        costCommit: 0,
+                        costActual: 0,
+                        availableBudget: 0,
+                        items: []
+                    };
+                }
+                acc[wbs].costPlan += Number(curr.costPlan || 0);
+                acc[wbs].costCommit += Number(curr.costCommit || 0);
+                acc[wbs].costActual += Number(curr.costActual || 0);
+                acc[wbs].availableBudget += Number(curr.availableBudget || 0);
+                acc[wbs].items.push(curr);
+                return acc;
+            }, {});
+
+            setFinancials(Object.values(grouped));
+            setShowFinancials(true);
+        } catch (error) {
+            console.error("Error fetching financials:", error);
+            alert("Failed to fetch financials data.");
+        } finally {
+            setLoadingFinancials(false);
         }
     };
 
@@ -1053,6 +1113,17 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
         }
         window.postMessage({
             type: 'GO_TO_TEAM_SCRAPE',
+            projectNumber: project.projNumber
+        }, '*');
+    };
+
+    const handleScrapeFinancials = () => {
+        if (!project.projNumber) {
+            alert("Project number is missing for this card.");
+            return;
+        }
+        window.postMessage({
+            type: 'GO_TO_FINANCIALS_SCRAPE',
             projectNumber: project.projNumber
         }, '*');
     };
@@ -1141,6 +1212,13 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
                             {loadingTeam ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />}
                         </button>
                         <button
+                            onClick={fetchFinancials}
+                            className={`p-2 rounded-lg transition-all flex items-center gap-1 ${showFinancials ? 'bg-emerald-100 text-emerald-600' : 'text-slate-300 hover:text-emerald-600 hover:bg-emerald-50'}`}
+                            title="View Financials"
+                        >
+                            {loadingFinancials ? <Loader2 size={16} className="animate-spin" /> : <Banknote size={16} />}
+                        </button>
+                        <button
                             onClick={handleGoToCpc}
                             className="p-1 rounded-lg transition-all flex items-center justify-center hover:bg-indigo-50"
                             title="Go to CPC"
@@ -1216,6 +1294,77 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
                                 })}
                         </div>
                     </div>
+                </div>
+            )}
+            {showFinancials && (
+                <div className="mt-4 pt-4 border-t border-slate-100 overflow-x-auto">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <Banknote size={12} className="text-emerald-500" /> Project Financials (Mio IDR)
+                            </h4>
+                            {lastUpdatedFinancials && (
+                                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${(new Date() - lastUpdatedFinancials) / (1000 * 60 * 60 * 24) > 7
+                                        ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                                        : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                    }`}>
+                                    Updated: {lastUpdatedFinancials.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                </span>
+                            )}
+                        </div>
+                        <button
+                            onClick={handleScrapeFinancials}
+                            className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-tighter"
+                            title="Scrape Financials from CPC"
+                        >
+                            <Database size={10} /> Scrape Financials
+                        </button>
+                    </div>
+                    <table className="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr className="bg-slate-50">
+                                <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">WBS</th>
+                                <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">GL Account</th>
+                                <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">Description</th>
+                                <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Cost Plan</th>
+                                <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Commitment</th>
+                                <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Actual</th>
+                                <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Available</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {financials.map(group => (
+                                <React.Fragment key={group.wbs}>
+                                    {/* WBS Total Row */}
+                                    <tr className="bg-emerald-50/30 border-b border-emerald-50">
+                                        <td className="px-3 py-2 text-[11px] font-black text-emerald-900 tabular-nums">{group.wbs}</td>
+                                        <td colSpan="2" className="px-3 py-2 text-[11px] font-black text-emerald-900 italic uppercase tracking-tighter">WBS TOTAL</td>
+                                        <td className="px-3 py-2 text-[11px] font-black text-emerald-900 text-right tabular-nums">{group.costPlan.toLocaleString('id-ID')}M</td>
+                                        <td className="px-3 py-2 text-[11px] font-black text-emerald-900 text-right tabular-nums">{group.costCommit.toLocaleString('id-ID')}M</td>
+                                        <td className="px-3 py-2 text-[11px] font-black text-emerald-900 text-right tabular-nums">{group.costActual.toLocaleString('id-ID')}M</td>
+                                        <td className={`px-3 py-2 text-[11px] font-black text-right tabular-nums ${group.availableBudget < 0 ? 'text-red-600' : 'text-emerald-900'}`}>{group.availableBudget.toLocaleString('id-ID')}M</td>
+                                    </tr>
+                                    {/* Detail Rows */}
+                                    {group.items.map((item, idx) => (
+                                        <tr key={`${group.wbs}-${idx}`} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
+                                            <td className="px-3 py-2 text-[11px] text-slate-400 tabular-nums"></td>
+                                            <td className="px-3 py-2 text-[11px] font-bold text-slate-600 tabular-nums">{item.glAccount}</td>
+                                            <td className="px-3 py-2 text-[11px] font-medium text-slate-700">{item.glAccountName}</td>
+                                            <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{item.costPlan.toLocaleString('id-ID')}M</td>
+                                            <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{item.costCommit.toLocaleString('id-ID')}M</td>
+                                            <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{item.costActual > 0 ? `${item.costActual.toLocaleString('id-ID')}M` : '-'}</td>
+                                            <td className={`px-3 py-2 text-[11px] font-bold text-right tabular-nums ${item.availableBudget < 0 ? 'text-red-600' : 'text-slate-800'}`}>{item.availableBudget.toLocaleString('id-ID')}M</td>
+                                        </tr>
+                                    ))}
+                                </React.Fragment>
+                            ))}
+                        </tbody>
+                    </table>
+                    {financials.length === 0 && !loadingFinancials && (
+                        <div className="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">No financial data available</p>
+                        </div>
+                    )}
                 </div>
             )}
             {showTeam && (
