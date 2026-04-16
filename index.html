@@ -162,6 +162,39 @@
                 return `Rp ${val?.toLocaleString()}`;
             };
 
+            const safeParseFloat = (val) => {
+                if (val === null || val === undefined || val === '') return 0;
+                let result = 0;
+                if (typeof val === 'number') {
+                    result = val;
+                } else {
+                    const clean = String(val).replace(/[^0-9.,-]/g, '');
+                    if (!clean) return 0;
+                    
+                    const hasComma = clean.includes(',');
+                    const hasDot = clean.includes('.');
+                    
+                    if (hasComma && hasDot) {
+                        if (clean.lastIndexOf(',') > clean.lastIndexOf('.')) {
+                            result = parseFloat(clean.replace(/\./g, '').replace(',', '.'));
+                        } else {
+                            result = parseFloat(clean.replace(/,/g, ''));
+                        }
+                    } else if (hasComma) {
+                        const parts = clean.split(',');
+                        if (parts[parts.length - 1].length === 3) result = parseFloat(clean.replace(/,/g, ''));
+                        else result = parseFloat(clean.replace(',', '.'));
+                    } else if (hasDot) {
+                        const parts = clean.split('.');
+                        if (parts[parts.length - 1].length === 3 && parts.length > 1) result = parseFloat(clean.replace(/\./g, ''));
+                        else result = parseFloat(clean);
+                    } else {
+                        result = parseFloat(clean);
+                    }
+                }
+                return isNaN(result) ? 0 : result;
+            };
+
             const extractTextFromFile = async (file) => {
                 const extension = file.name.split('.').pop().toLowerCase();
                 let text = "";
@@ -626,10 +659,10 @@ Capabilities & Instructions:
                                     items: []
                                 };
                             }
-                            acc[wbs].costPlan += Number(curr.costPlan || 0);
-                            acc[wbs].costCommit += Number(curr.costCommit || 0);
-                            acc[wbs].costActual += Number(curr.costActual || 0);
-                            acc[wbs].availableBudget += Number(curr.availableBudget || 0);
+                            acc[wbs].costPlan += safeParseFloat(curr.costPlan);
+                            acc[wbs].costCommit += safeParseFloat(curr.costCommit);
+                            acc[wbs].costActual += safeParseFloat(curr.costActual);
+                            acc[wbs].availableBudget += safeParseFloat(curr.availableBudget);
                             acc[wbs].items.push(curr);
                             return acc;
                         }, {});
@@ -842,10 +875,10 @@ Capabilities & Instructions:
                                                         <td className="px-3 py-2 text-[11px] text-slate-400 tabular-nums"></td>
                                                         <td className="px-3 py-2 text-[11px] font-bold text-slate-600 tabular-nums">{item.glAccount}</td>
                                                         <td className="px-3 py-2 text-[11px] font-medium text-slate-700">{item.glAccountName}</td>
-                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{item.costPlan.toLocaleString('id-ID')}M</td>
-                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{item.costCommit.toLocaleString('id-ID')}M</td>
-                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{item.costActual > 0 ? `${item.costActual.toLocaleString('id-ID')}M` : '-'}</td>
-                                                        <td className={`px-3 py-2 text-[11px] font-bold text-right tabular-nums ${item.availableBudget < 0 ? 'text-red-600' : 'text-slate-800'}`}>{item.availableBudget.toLocaleString('id-ID')}M</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{safeParseFloat(item.costPlan).toLocaleString('id-ID')}M</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{safeParseFloat(item.costCommit).toLocaleString('id-ID')}M</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{safeParseFloat(item.costActual) > 0 ? `${safeParseFloat(item.costActual).toLocaleString('id-ID')}M` : '-'}</td>
+                                                        <td className={`px-3 py-2 text-[11px] font-bold text-right tabular-nums ${safeParseFloat(item.availableBudget) < 0 ? 'text-red-600' : 'text-slate-800'}`}>{safeParseFloat(item.availableBudget).toLocaleString('id-ID')}M</td>
                                                     </tr>
                                                 ))}
                                             </React.Fragment>

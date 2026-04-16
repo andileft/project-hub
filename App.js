@@ -513,6 +513,15 @@ const App = () => {
         return `Rp ${val?.toLocaleString()}`;
     };
 
+    const safeParseFloat = (val) => {
+        if (val === null || val === undefined) return 0;
+        if (typeof val === 'number') return val;
+        // Remove commas (thousand separators) and parse
+        const cleaned = String(val).replace(/,/g, '');
+        const parsed = parseFloat(cleaned);
+        return isNaN(parsed) ? 0 : parsed;
+    };
+
     // Number formatting helpers for form inputs
     const formatNumberWithCommas = (value) => {
         if (!value) return '';
@@ -1066,10 +1075,10 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
                         items: []
                     };
                 }
-                acc[wbs].costPlan += Number(curr.costPlan || 0);
-                acc[wbs].costCommit += Number(curr.costCommit || 0);
-                acc[wbs].costActual += Number(curr.costActual || 0);
-                acc[wbs].availableBudget += Number(curr.availableBudget || 0);
+                acc[wbs].costPlan += safeParseFloat(curr.costPlan);
+                acc[wbs].costCommit += safeParseFloat(curr.costCommit);
+                acc[wbs].costActual += safeParseFloat(curr.costActual);
+                acc[wbs].availableBudget += safeParseFloat(curr.availableBudget);
                 acc[wbs].items.push(curr);
                 return acc;
             }, {});
