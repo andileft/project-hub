@@ -619,6 +619,16 @@ Capabilities & Instructions:
                     }, '*');
                 };
 
+                const handleGoToTechHub = (e) => {
+                    e.stopPropagation();
+                    if (!project.projNumber) {
+                        alert("Project number is missing for this card.");
+                        return;
+                    }
+                    const url = `https://tech-hub-22966312336.asia-southeast2.run.app/?projectNo=${encodeURIComponent(project.projNumber)}`;
+                    window.open(url, '_blank');
+                };
+
                 const fetchFinancials = async (e) => {
                     if (e) e.stopPropagation();
                     if (showFinancials) {
@@ -767,6 +777,15 @@ Capabilities & Instructions:
                                     >
                                         <div className="bg-[#10b981] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1 uppercase">
                                             Financials
+                                        </div>
+                                    </button>
+                                    <button
+                                        onClick={handleGoToTechHub}
+                                        className="p-1 bg-slate-50 hover:bg-cyan-50 border border-slate-100 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+                                        title="Go to Tech Hub"
+                                    >
+                                        <div className="bg-[#0891b2] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1 uppercase">
+                                            TECH
                                         </div>
                                     </button>
                                 </div>
