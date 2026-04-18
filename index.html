@@ -1060,7 +1060,6 @@ Capabilities & Instructions:
                 });
 
                 const fileInputRef = useRef(null);
-                const [isChatOpen, setIsChatOpen] = useState(false);
                 const [formData, setFormData] = useState({
                     projNumber: '', customer: '', projName: '', pm: '',
                     value: '', sisaMandays: '', start: '', end: '',
@@ -1099,13 +1098,6 @@ Capabilities & Instructions:
                         } else {
                             setUserRole(null);
                             setIsAuthenticated(false);
-                            // Auto sign-in anonymously if you still use it for Vertex AI,
-                            // but keep isAuthenticated false so they stay on login screen.
-                            try {
-                                await signInAnonymously(auth);
-                            } catch (err) {
-                                console.error("Anonymous auth error:", err);
-                            }
                         }
 
                         setUser(currentUser);
@@ -1140,49 +1132,20 @@ Capabilities & Instructions:
 
                 const isAdmin = userRole === 'admin';
 
-
-
-                // Removed callGemini from here as it's now global in mountApp
-
-                // ChatWindow handles AI chat logic internally
-
-                const generateSmartSolution = async () => {
-                    // Mock smart generation
-                    if (!formData.projName || isGeneratingSolution) return;
-                    setIsGeneratingSolution(true);
-                    setTimeout(() => {
-                        setFormData(prev => ({ ...prev, solusi: "Proposed Solution: Implementation of microservices architecture." }));
-                        setIsGeneratingSolution(false);
-                    }, 1000);
-                };
-
-                const generateStatusNote = async () => {
-                    // Mock smart generation
-                    if (!formData.projName || isGeneratingSolution) return;
-                    setIsGeneratingSolution(true);
-                    setTimeout(() => {
-                        setFormData(prev => ({ ...prev, note: "Project is on track with recent milestone completion." }));
-                        setIsGeneratingSolution(false);
-                    }, 1000);
-                };
-
                 const handleLoginSubmit = async (e) => {
                     e.preventDefault();
                     setLoginError('');
                     try {
                         await signInWithEmailAndPassword(auth, emailInput, passwordInput);
-                        setIsAuthenticated(true); // Set authenticated after successful login
+                        setIsAuthenticated(true);
                     } catch (err) {
                         console.error("Login failed:", err);
-                        // Show specific error to help debug
                         if (err.code === 'auth/user-not-found') {
-                            setLoginError("User not found. Did you create the user in 'Authentication' tab?");
+                            setLoginError("User not found.");
                         } else if (err.code === 'auth/wrong-password') {
                             setLoginError("Wrong password.");
-                        } else if (err.code === 'auth/invalid-email') {
-                            setLoginError("Invalid email format.");
                         } else {
-                            setLoginError(`Login failed: ${err.message} (${err.code})`);
+                            setLoginError(`Login failed: ${err.message}`);
                         }
                     }
                 };
@@ -1969,13 +1932,6 @@ Capabilities & Instructions:
                                 </div>
                             )}
                         </main>
-                        {isChatOpen && <ChatWindow projects={projects} onClose={() => setIsChatOpen(false)} onFilter={({ search, status }) => {
-                            if (search) setSearchTerm(search);
-                            if (status) setFilters(prev => ({ ...prev, status }));
-                            // If coming from AI search, reset specific filters that might conflict
-                            if (search) setFilters(prev => ({ ...prev, pm: 'All', customer: 'All', solution: 'All' }));
-                            setActiveTab('list');
-                        }} />}
                         {isModalOpen && (
                             <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
                                 <div className="bg-white p-8 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
@@ -2061,11 +2017,6 @@ Capabilities & Instructions:
                                 </div>
                             </div>
                         )}
-                        <button
-                            onClick={() => setIsChatOpen(!isChatOpen)}
-                            className={`fixed bottom-6 right-6 w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl transition-all duration-300 bg-indigo-600 text-white z-50`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bot"><path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></svg>
-                        </button>
 
                         <style>{`
                 .btn-primary { @apply inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-sm active:scale-95; }
