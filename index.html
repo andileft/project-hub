@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -66,7 +67,7 @@
 
 </head>
 
-<body class="bg-slate-50">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white dark:text-slate-100 transition-colors duration-200">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -88,7 +89,8 @@
             X, Save, CheckCircle2, Loader2, Upload, Tag, Briefcase, FileText, Settings, Shield,
             ArrowRight, LogIn, LogOut, Lock, AlertCircle, Mail, LayoutDashboard, List, TrendingUp, BarChart3, PieChart,
             Sparkles, BrainCircuit, MessageSquare, Wand2, RotateCcw, UserCheck, StickyNote, Lightbulb, UserCog, Layers,
-            Timer, Banknote, Trophy, HardHat, Bot, Send, Minimize2, Sparkle, Building2, AlertTriangle, Paperclip, File
+            Timer, Banknote, Trophy, HardHat, Bot, Send, Minimize2, Sparkle, Building2, AlertTriangle, Paperclip, File,
+            Sun, Moon
         } = IconProxy;
 
         // Firebase Globals (Mapped from Module Shim)
@@ -146,7 +148,7 @@
                         return (
                             <div className="p-8 text-center">
                                 <h1 className="text-xl font-bold text-red-600 mb-2">Something went wrong.</h1>
-                                <p className="text-slate-500 mb-4">{this.state.error?.toString()}</p>
+                                <p className="text-slate-500 dark:text-slate-400 mb-4">{this.state.error?.toString()}</p>
                                 <button onClick={() => window.location.reload()} className="px-4 py-2 bg-indigo-600 text-white rounded-lg">Reload Page</button>
                             </div>
                         );
@@ -351,20 +353,20 @@ Capabilities & Instructions:
                 };
 
                 return (
-                    <div className="fixed bottom-24 right-6 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
+                    <div className="fixed bottom-24 right-6 w-80 md:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
                         <div className="bg-indigo-600 p-4 flex justify-between items-center text-white">
                             <div className="flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></svg>
                                 <span className="font-bold text-sm">AI Portfolio Advisor</span>
                             </div>
-                            <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-lg transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 18 12" /></svg></button>
+                            <button onClick={onClose} className="hover:bg-white dark:bg-slate-800/20 p-1 rounded-lg transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 18 12" /></svg></button>
                         </div>
-                        <div className="h-[400px] overflow-y-auto p-4 space-y-3 bg-slate-50" ref={scrollRef}>
+                        <div className="h-[400px] overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-900" ref={scrollRef}>
                             {messages.map((m, i) => (
                                 <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`max-w-[85%] p-3 rounded-2xl text-xs font-medium leading-relaxed ${m.role === 'user'
                                         ? 'bg-indigo-600 text-white rounded-br-none shadow-sm'
-                                        : 'bg-white text-slate-700 border border-slate-200 rounded-bl-none shadow-sm prose prose-slate'
+                                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-bl-none shadow-sm prose dark:prose-invert prose-slate'
                                         }`}>
                                         {m.role === 'assistant' ? <span dangerouslySetInnerHTML={{ __html: formatAssistantMessageHtml(m.text) }} /> : m.text}
                                     </div>
@@ -372,7 +374,7 @@ Capabilities & Instructions:
                             ))}
                             {isAiThinking && (
                                 <div className="flex justify-start">
-                                    <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-bl-none shadow-sm flex gap-1 items-center">
+                                    <div className="bg-white dark:bg-slate-800 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl rounded-bl-none shadow-sm flex gap-1 items-center">
                                         <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
                                         <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
                                         <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
@@ -380,9 +382,9 @@ Capabilities & Instructions:
                                 </div>
                             )}
                         </div>
-                        <form onSubmit={handleSend} className="p-3 bg-white border-t border-slate-100 flex gap-2">
+                        <form onSubmit={handleSend} className="p-3 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                             <input
-                                className="flex-1 bg-slate-100 border-0 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none"
+                                className="flex-1 bg-slate-100 dark:bg-slate-800 border-0 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
                                 placeholder="Ask about project docs or analysis..."
                                 value={input}
                                 onChange={e => setInput(e.target.value)}
@@ -433,13 +435,13 @@ Capabilities & Instructions:
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
-                        className={`relative rounded-xl border-2 border-dashed transition-all p-3 flex flex-col justify-between h-24 group ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-slate-50 hover:border-indigo-300'
+                        className={`relative rounded-xl border-2 border-dashed transition-all p-3 flex flex-col justify-between h-24 group ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-indigo-300'
                             }`}
                     >
                         <div className="flex justify-between items-start">
                             <p className="text-[10px] font-black text-slate-400 uppercase">{label}</p>
                             {fileUrl && onDelete && (
-                                <button type="button" onClick={onDelete} className="text-red-400 hover:text-red-600 p-1 bg-white rounded-md shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button type="button" onClick={onDelete} className="text-red-400 hover:text-red-600 p-1 bg-white dark:bg-slate-800 rounded-md shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
                                 </button>
                             )}
@@ -451,7 +453,7 @@ Capabilities & Instructions:
                                 Uploading...
                             </div>
                         ) : fileUrl ? (
-                            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-2 py-1.5 bg-white rounded-lg border border-slate-100 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors truncate">
+                            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-2 py-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-800 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors truncate">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle-2 text-emerald-500"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
                                 <span className="truncate">View File</span>
                             </a>
@@ -477,10 +479,22 @@ Capabilities & Instructions:
 
             const getStatusClasses = (status) => {
                 switch (status) {
-                    case 'Done': return { border: 'border-l-emerald-500', badge: 'bg-emerald-50 text-emerald-600 border-emerald-100' };
-                    case 'Maintenance': return { border: 'border-l-pink-500', badge: 'bg-pink-50 text-pink-600 border-pink-100' };
-                    case 'Belum SDHO': return { border: 'border-l-amber-500', badge: 'bg-amber-50 text-amber-600 border-amber-100' };
-                    default: return { border: 'border-l-indigo-500', badge: 'bg-indigo-50 text-indigo-600 border-indigo-100' };
+                    case 'Done': return { 
+                        border: 'border-l-emerald-500', 
+                        badge: 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' 
+                    };
+                    case 'Maintenance': return { 
+                        border: 'border-l-pink-500', 
+                        badge: 'bg-pink-50 text-pink-600 border-pink-100 dark:bg-pink-900/20 dark:text-pink-400 dark:border-pink-800/50' 
+                    };
+                    case 'Belum SDHO': return { 
+                        border: 'border-l-amber-500', 
+                        badge: 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50' 
+                    };
+                    default: return { 
+                        border: 'border-l-indigo-500', 
+                        badge: 'bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800/50' 
+                    };
                 }
             };
 
@@ -703,35 +717,35 @@ Capabilities & Instructions:
                 };
 
                 return (
-                    <div onClick={() => onEdit(project)} className={`bg-white rounded-xl border border-slate-200 border-l-4 ${statusStyle.border} p-5 hover:shadow-md transition-all group relative overflow-hidden flex flex-col gap-4 cursor-pointer`}>
+                    <div onClick={() => onEdit(project)} className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 border-l-4 ${statusStyle.border} p-5 hover:shadow-md transition-all group relative overflow-hidden flex flex-col gap-4 cursor-pointer`}>
                         <div className="flex flex-col lg:flex-row lg:items-start gap-6">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1.5">
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter tabular-nums">{project.projNumber || 'NO-ID'}</span>
                                     <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${statusStyle.badge}`}>{project.status}</span>
-                                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-500">{project.methodology || 'BAST Only'}</span>
+                                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400">{project.methodology || 'BAST Only'}</span>
                                 </div>
-                                <h3 className="font-bold text-slate-800 truncate text-lg group-hover:text-indigo-600 transition-colors mb-2">{project.projName}</h3>
+                                <h3 className="font-bold text-slate-800 dark:text-slate-100 truncate text-lg group-hover:text-indigo-600 transition-colors mb-2">{project.projName}</h3>
                                 <div className="flex flex-wrap gap-x-4 gap-y-2 items-center">
-                                    <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                    <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-building-2 text-slate-400"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /><path d="M10 6h4" /><path d="M10 10h4" /><path d="M10 14h4" /><path d="M10 18h4" /></svg>
                                         {project.customer}
                                     </div>
 
-                                    <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                    <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user-cog text-slate-400"><circle cx="18" cy="15" r="3" /><circle cx="9" cy="7" r="4" /><path d="M10 15H6a4 4 0 0 0-4 4v2" /><path d="m21.7 16.4.9.9" /><path d="m15.3 22.8.9.9" /><path d="m21.7 22.8-.9-.9" /><path d="m15.3 16.4-.9-.9" /><path d="m16.6 19.6 3.8 3.8" /><path d="M16 19.5v.5" /><path d="M20 20.5v.5" /><path d="M20.5 20H20" /><path d="M16.5 20H16" /></svg>
                                         {project.pm || <span className="text-slate-400 italic">Unassigned PM</span>}
                                     </div>
 
                                     {project.subcon && (
-                                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users text-slate-400"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                                             {project.subcon}
                                         </div>
                                     )}
 
                                     {(project.start || project.end) && (
-                                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calendar-range text-slate-400"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /><path d="M17 14h-6" /><path d="M13 18H7" /><path d="M7 14h.01" /><path d="M17 18h.01" /></svg>
                                             <span className="tabular-nums">{formatDisplayDate(project.start)} - {formatDisplayDate(project.end)}</span>
                                         </div>
@@ -743,42 +757,42 @@ Capabilities & Instructions:
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Value</p>
                                     <p className="text-sm font-bold text-indigo-600 tabular-nums">{formatShortCurrency(project.value)}</p>
                                 </div>
-                                <div className="text-right border-l lg:border-l-0 lg:border-t border-slate-200 pl-3 lg:pl-0 lg:pt-1 ml-3 lg:ml-0">
+                                <div className="text-right border-l lg:border-l-0 lg:border-t border-slate-200 dark:border-slate-700 pl-3 lg:pl-0 lg:pt-1 ml-3 lg:ml-0">
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mandays</p>
                                     <p className="text-sm font-bold text-emerald-600 tabular-nums">{formatShortCurrency(project.sisaMandays)}</p>
                                 </div>
                                 <div className="flex items-center gap-2 mt-2 w-full lg:w-auto">
                                     <button
                                         onClick={fetchTeam}
-                                        className={`p-2 rounded-lg transition-all flex items-center justify-center gap-1 flex-1 lg:flex-none ${showTeam ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-100'}`}
+                                        className={`p-2 rounded-lg transition-all flex items-center justify-center gap-1 flex-1 lg:flex-none ${showTeam ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800'}`}
                                         title="View Team"
                                     >
                                         {loadingTeam ? <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>}
                                     </button>
                                     <button
                                         onClick={fetchFinancials}
-                                        className={`p-2 rounded-lg transition-all flex items-center justify-center gap-1 flex-1 lg:flex-none ${showFinancials ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-50 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-100'}`}
+                                        className={`p-2 rounded-lg transition-all flex items-center justify-center gap-1 flex-1 lg:flex-none ${showFinancials ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-100 dark:border-slate-800'}`}
                                         title="View Financials"
                                     >
                                         {loadingFinancials ? <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-banknote"><rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>}
                                     </button>
                                     <button
                                         onClick={handleGoToCpc}
-                                        className="p-1 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+                                        className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
                                         title="Go to CPC"
                                     >
                                         <div className="bg-[#1e5bb8] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none">CPC</div>
                                     </button>
                                     <button
                                         onClick={handleGoToSimplify}
-                                        className="p-1 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+                                        className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
                                         title="Go to Simplify"
                                     >
                                         <div className="bg-[#f39c12] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none">SIMPLIFY</div>
                                     </button>
                                     <button
                                         onClick={handleGoToIserve}
-                                        className="p-1 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+                                        className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
                                         title="Go to iServe"
                                     >
                                         <div className="bg-[#800000] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1">
@@ -787,7 +801,7 @@ Capabilities & Instructions:
                                     </button>
                                     <button
                                         onClick={handleGoToFinancials}
-                                        className="p-1 bg-slate-50 hover:bg-emerald-50 border border-slate-100 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+                                        className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-emerald-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
                                         title="Go to Financials"
                                     >
                                         <div className="bg-[#10b981] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1 uppercase">
@@ -796,7 +810,7 @@ Capabilities & Instructions:
                                     </button>
                                     <button
                                         onClick={handleGoToTechHub}
-                                        className="p-1 bg-slate-50 hover:bg-cyan-50 border border-slate-100 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+                                        className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-cyan-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
                                         title="Go to Tech Hub"
                                     >
                                         <div className="bg-[#0891b2] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1 uppercase">
@@ -807,52 +821,64 @@ Capabilities & Instructions:
                             </div>
                         </div>
                         {project.solusi && (
-                            <div className="bg-slate-50 rounded-lg p-2.5 flex items-start gap-2 border border-slate-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-lightbulb text-amber-500 mt-0.5 shrink-0"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5A6 6 0 0 0 6 8c0 1 .5 2 1.5 3.5.8.8 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" /></svg>
-                                <p className="text-xs text-slate-600 italic leading-relaxed line-clamp-2">{project.solusi}</p>
+                            <div className="bg-slate-50/80 dark:bg-slate-900/50 rounded-xl p-3 flex items-start gap-3 border border-slate-100 dark:border-slate-800/50 shadow-sm transition-all hover:shadow-md">
+                                <div className="p-1.5 bg-amber-100 dark:bg-amber-900/30 rounded-lg shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-lightbulb text-amber-600 dark:text-amber-400 mt-0.5 shrink-0"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5A6 6 0 0 0 6 8c0 1 .5 2 1.5 3.5.8.8 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" /></svg>
+                                </div>
+                                <div>
+                                    <h5 className="text-[9px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-1">Proposed Solution</h5>
+                                    <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 italic leading-relaxed line-clamp-3">{project.solusi}</p>
+                                </div>
                             </div>
                         )}
                         {project.note && (
-                            <div className="bg-blue-50/50 rounded-lg p-2.5 flex items-start gap-2 border border-blue-50">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sticky-note text-blue-400 mt-0.5 shrink-0"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z" /><path d="M15 3v6h6" /></svg>
-                                <div className="max-h-24 overflow-y-auto w-full">
-                                    <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">{project.note}</p>
+                            <div className="relative pl-6 py-1">
+                                <div className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-indigo-200 dark:bg-indigo-900/40 rounded-full"></div>
+                                <div className="absolute left-0 top-3 w-4 h-4 bg-indigo-100 dark:bg-indigo-900 rounded-full border-4 border-white dark:border-slate-800 shadow-sm flex items-center justify-center">
+                                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                                </div>
+                                <div className="bg-white dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700/50 shadow-sm">
+                                    <h5 className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock-3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16.5 12"/></svg>
+                                        Latest Status Update
+                                    </h5>
+                                    <p className="text-[11px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">{project.note}</p>
                                 </div>
                             </div>
                         )}
 
                         {(project.files && (project.files.sdho || project.files.mom || project.files.kickoff || project.files.report)) && (
-                            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100 mt-auto">
+                            <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/50 mt-auto">
                                 {project.files.sdho && (
-                                    <a href={project.files.sdho} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 transition-colors border border-indigo-100">
+                                    <a href={project.files.sdho} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-tight text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1.5 rounded-lg hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 dark:hover:text-white transition-all border border-indigo-100 dark:border-indigo-800/50 shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-paperclip"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg> SDHO
                                     </a>
                                 )}
                                 {project.files.mom && (
-                                    <a href={project.files.mom} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded hover:bg-emerald-100 transition-colors border border-emerald-100">
+                                    <a href={project.files.mom} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-tight text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-1.5 rounded-lg hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white transition-all border border-emerald-100 dark:border-emerald-800/50 shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></svg> MOM
                                     </a>
                                 )}
                                 {project.files.kickoff && (
-                                    <a href={project.files.kickoff} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded hover:bg-amber-100 transition-colors border border-amber-100">
+                                    <a href={project.files.kickoff} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-tight text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2.5 py-1.5 rounded-lg hover:bg-amber-600 hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-all border border-amber-100 dark:border-amber-800/50 shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-flag"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" x2="4" y1="22" y2="15" /></svg> Kickoff
                                     </a>
                                 )}
                                 {project.files.report && (
-                                    <a href={project.files.report} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1 text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition-colors border border-blue-100">
+                                    <a href={project.files.report} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-tight text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 rounded-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white transition-all border border-blue-100 dark:border-blue-800/50 shadow-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-bar-chart"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-4" /><path d="M8 18v-2" /><path d="M16 18v-6" /></svg> Report
                                     </a>
                                 )}
                             </div>
                         )}
                         {isAdmin && (
-                            <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 bg-gradient-to-l from-white via-white to-transparent pl-8">
-                                <button onClick={(e) => { e.stopPropagation(); onEdit(project); }} className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-all shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></svg></button>
-                                <button onClick={(e) => { e.stopPropagation(); onDelete(project.id); }} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg></button>
+                            <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 bg-gradient-to-l from-white via-white dark:from-slate-800 dark:via-slate-800 to-transparent pl-8 rounded-tr-2xl">
+                                <button onClick={(e) => { e.stopPropagation(); onEdit(project); }} className="p-2 bg-indigo-50 dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 transition-all shadow-sm group/btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></svg></button>
+                                <button onClick={(e) => { e.stopPropagation(); onDelete(project.id); }} className="p-2 bg-red-50 dark:bg-slate-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-500 transition-all shadow-sm group/btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="8" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg></button>
                             </div>
                         )}
                         {showFinancials && (
-                            <div className="mt-4 pt-4 border-t border-slate-100 overflow-x-auto" onClick={(e) => e.stopPropagation()}>
+                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 overflow-x-auto" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-3">
                                         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -881,14 +907,14 @@ Capabilities & Instructions:
                                 </div>
                                 <table className="w-full text-left border-collapse min-w-[700px]">
                                     <thead>
-                                        <tr className="bg-slate-50">
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">WBS</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">GL Account</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">Description</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Cost Plan</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Commitment</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Actual</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-right">Available</th>
+                                        <tr className="bg-slate-50 dark:bg-slate-900">
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">WBS</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">GL Account</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">Description</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight text-right">Cost Plan</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight text-right">Commitment</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight text-right">Actual</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight text-right">Available</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -905,14 +931,14 @@ Capabilities & Instructions:
                                                 </tr>
                                                 {/* Detail Rows */}
                                                 {group.items.map((item, idx) => (
-                                                    <tr key={`${group.wbs}-${idx}`} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
+                                                    <tr key={`${group.wbs}-${idx}`} className="border-b border-slate-50 last:border-0 hover:bg-slate-50 dark:bg-slate-900/50 transition-colors">
                                                         <td className="px-3 py-2 text-[11px] text-slate-400 tabular-nums"></td>
-                                                        <td className="px-3 py-2 text-[11px] font-bold text-slate-600 tabular-nums">{item.glAccount}</td>
-                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-700">{item.glAccountName}</td>
-                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{safeParseFloat(item.costPlan).toLocaleString('id-ID')}M</td>
-                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{safeParseFloat(item.costCommit).toLocaleString('id-ID')}M</td>
-                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 text-right tabular-nums">{safeParseFloat(item.costActual) > 0 ? `${safeParseFloat(item.costActual).toLocaleString('id-ID')}M` : '-'}</td>
-                                                        <td className={`px-3 py-2 text-[11px] font-bold text-right tabular-nums ${safeParseFloat(item.availableBudget) < 0 ? 'text-red-600' : 'text-slate-800'}`}>{safeParseFloat(item.availableBudget).toLocaleString('id-ID')}M</td>
+                                                        <td className="px-3 py-2 text-[11px] font-bold text-slate-600 dark:text-slate-300 tabular-nums">{item.glAccount}</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-700 dark:text-slate-200">{item.glAccountName}</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 dark:text-slate-300 text-right tabular-nums">{safeParseFloat(item.costPlan).toLocaleString('id-ID')}M</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 dark:text-slate-300 text-right tabular-nums">{safeParseFloat(item.costCommit).toLocaleString('id-ID')}M</td>
+                                                        <td className="px-3 py-2 text-[11px] font-medium text-slate-600 dark:text-slate-300 text-right tabular-nums">{safeParseFloat(item.costActual) > 0 ? `${safeParseFloat(item.costActual).toLocaleString('id-ID')}M` : '-'}</td>
+                                                        <td className={`px-3 py-2 text-[11px] font-bold text-right tabular-nums ${safeParseFloat(item.availableBudget) < 0 ? 'text-red-600' : 'text-slate-800 dark:text-slate-100'}`}>{safeParseFloat(item.availableBudget).toLocaleString('id-ID')}M</td>
                                                     </tr>
                                                 ))}
                                             </React.Fragment>
@@ -920,14 +946,14 @@ Capabilities & Instructions:
                                     </tbody>
                                 </table>
                                 {financials.length === 0 && !loadingFinancials && (
-                                    <div className="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                    <div className="py-8 text-center bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">No financial data available</p>
                                     </div>
                                 )}
                             </div>
                         )}
                         {showTeam && (
-                            <div className="mt-4 pt-4 border-t border-slate-100 overflow-x-auto" onClick={(e) => e.stopPropagation()}>
+                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 overflow-x-auto" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center justify-between mb-3">
                                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users text-indigo-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
@@ -946,37 +972,37 @@ Capabilities & Instructions:
                                 </div>
                                 <table className="w-full text-left border-collapse min-w-[600px]">
                                     <thead>
-                                        <tr className="bg-slate-50">
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">WBS</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">NPK</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">Name</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">Role</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">From</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">To</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight">Type</th>
-                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 uppercase tracking-tight text-center">Action</th>
+                                        <tr className="bg-slate-50 dark:bg-slate-900">
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">WBS</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">NPK</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">Name</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">Role</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">From</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">To</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">Type</th>
+                                            <th className="px-3 py-2 text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight text-center">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {team.map(member => {
                                             const isPM = (member.role || '').toLowerCase() === 'project manager';
                                             return (
-                                                <tr key={member.id} className={`border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors ${isPM ? 'bg-indigo-50/50' : ''}`}>
-                                                    <td className={`px-3 py-2 text-[11px] font-bold tabular-nums ${isPM ? 'text-indigo-900' : 'text-slate-700'}`}>{member.wbs || member.fullWbs || '-'}</td>
-                                                    <td className={`px-3 py-2 text-[11px] font-bold tabular-nums ${isPM ? 'text-indigo-900' : 'text-slate-600'}`}>{member.npk || '-'}</td>
-                                                    <td className={`px-3 py-2 text-[11px] font-black ${isPM ? 'text-indigo-900' : 'text-slate-800'}`}>
+                                                <tr key={member.id} className={`border-b border-slate-100 dark:border-slate-700/50 last:border-0 transition-colors ${isPM ? 'bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30' : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'}`}>
+                                                    <td className={`px-3 py-2 text-[11px] font-bold tabular-nums ${isPM ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'}`}>{member.wbs || member.fullWbs || '-'}</td>
+                                                    <td className={`px-3 py-2 text-[11px] font-bold tabular-nums ${isPM ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-600 dark:text-slate-300'}`}>{member.npk || '-'}</td>
+                                                    <td className={`px-3 py-2 text-[11px] font-black ${isPM ? 'text-indigo-700 dark:text-indigo-200' : 'text-slate-800 dark:text-slate-100'}`}>
                                                         <div className="flex items-center gap-1">
                                                             {isPM && <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shield-check text-indigo-600"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg>}
                                                             {member.name || '-'}
                                                         </div>
                                                     </td>
-                                                    <td className={`px-3 py-2 text-[11px] font-black ${isPM ? 'text-indigo-600' : 'text-slate-600'}`}>
+                                                    <td className={`px-3 py-2 text-[11px] font-black ${isPM ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-300'}`}>
                                                         {member.role || '-'}
                                                     </td>
-                                                    <td className="px-3 py-2 text-[11px] font-bold text-slate-500 tabular-nums">{member.start || '-'}</td>
+                                                    <td className="px-3 py-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 tabular-nums">{member.start || '-'}</td>
                                                     <td className="px-3 py-2 text-[11px] font-bold text-indigo-600 tabular-nums">{member.end || '-'}</td>
                                                     <td className="px-3 py-2 text-[11px]">
-                                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter ${member.type === 'D' ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter ${member.type === 'D' ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}`}>
                                                             {member.type === 'S' ? 'Shared' : member.type === 'D' ? 'Dedicated' : member.type || '-'}
                                                         </span>
                                                     </td>
@@ -986,7 +1012,7 @@ Capabilities & Instructions:
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             onClick={(e) => e.stopPropagation()}
-                                                            className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-all text-[9.5px] font-black uppercase tracking-tighter border border-indigo-100"
+                                                            className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 dark:hover:text-white transition-all text-[9.5px] font-black uppercase tracking-tighter border border-indigo-100 dark:border-indigo-800/50 shadow-sm"
                                                             title="Open Assignment Generator"
                                                         >
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></svg> {letters[String(member.npk)] && <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle-2 text-emerald-500 shrink-0 inline-block mr-0.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" /><path d="m9 12 2 2 4-4" /></svg>}Letter
@@ -998,7 +1024,7 @@ Capabilities & Instructions:
                                     </tbody>
                                 </table>
                                 {team.length === 0 && !loadingTeam && (
-                                    <div className="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                    <div className="py-8 text-center bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">No team members assigned</p>
                                     </div>
                                 )}
@@ -1012,18 +1038,18 @@ Capabilities & Instructions:
             const FormInput = ({ label, type = "text", value, onChange, required, placeholder, options, action, disabled }) => (
                 <div className="space-y-1">
                     <div className="flex justify-between items-center">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">{label}</label>
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">{label}</label>
                         {action}
                     </div>
                     {options ? (
-                        <select disabled={disabled} className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold text-slate-700 text-sm disabled:opacity-75" value={value} onChange={(e) => onChange(e.target.value)}>
+                        <select disabled={disabled} className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold text-slate-700 dark:text-slate-200 text-sm disabled:opacity-75" value={value} onChange={(e) => onChange(e.target.value)}>
                             {options.map(o => <option key={o} value={o}>{o}</option>)}
                         </select>
                     ) : (
                         <input
                             type={type}
                             disabled={disabled}
-                            className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold text-slate-700 text-sm placeholder:text-slate-300 placeholder:font-normal disabled:opacity-75"
+                            className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold text-slate-700 dark:text-slate-200 text-sm placeholder:text-slate-300 placeholder:font-normal disabled:opacity-75"
                             value={value}
                             onChange={(e) => onChange(e.target.value)}
                             required={required}
@@ -1035,19 +1061,41 @@ Capabilities & Instructions:
 
             // Component: StatCard
             const StatCard = ({ title, value, icon, subtitle }) => (
-                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
                     <div className="flex items-start justify-between mb-4">
-                        <div className="p-3 bg-slate-50 rounded-xl group-hover:bg-indigo-50 transition-colors">{icon}</div>
-                        {subtitle && <span className="text-[10px] font-bold text-slate-300 bg-slate-50 px-2 py-1 rounded-full">{subtitle}</span>}
+                        <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/30 transition-colors">{icon}</div>
+                        {subtitle && <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded-full">{subtitle}</span>}
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{title}</p>
-                        <p className="text-2xl font-black text-slate-800 tracking-tight">{value}</p>
+                        <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">{value}</p>
                     </div>
                 </div>
             );
 
             const App = () => {
+                const [theme, setTheme] = useState(() => {
+                    if (typeof window !== 'undefined' && window.localStorage) {
+                        const stored = window.localStorage.getItem('theme');
+                        if (stored) return stored;
+                        if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+                    }
+                    return 'light';
+                });
+
+                useEffect(() => {
+                    if (theme === 'dark') {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                    window.localStorage.setItem('theme', theme);
+                }, [theme]);
+
+                const toggleTheme = () => {
+                    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+                };
+
                 const [activeTab, setActiveTab] = useState('list');
                 const [projects, setProjects] = useState([]);
                 const [user, setUser] = useState(null);
@@ -1692,20 +1740,20 @@ Capabilities & Instructions:
                     };
                 }, [projects]);
 
-                if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-loader-2 text-indigo-600 animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
                 </div>;
 
                 if (!isAuthenticated) return (
-                    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-                        <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full">
+                    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-800 p-4">
+                        <div className="bg-white dark:bg-slate-800 dark:bg-slate-800 p-8 rounded-3xl shadow-xl max-w-md w-full">
                             <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                             </div>
-                            <h2 className="text-2xl font-black text-slate-800 mb-6 text-center">Private Access</h2>
+                            <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-6 text-center">Private Access</h2>
                             <form onSubmit={handleLoginSubmit} className="space-y-4">
-                                <input type="email" required className="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl outline-none" placeholder="Email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} />
-                                <input type="password" required className="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl outline-none" placeholder="Password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} />
+                                <input type="email" required className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" placeholder="Email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} />
+                                <input type="password" required className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" placeholder="Password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} />
                                 {loginError && <p className="text-red-500 text-xs font-bold">{loginError}</p>}
                                 <button type="submit" className="w-full bg-indigo-600 py-3 rounded-xl font-bold text-white hover:bg-indigo-700 transition-all">Secure Login</button>
                                 <div className="text-center text-xs text-slate-400 mt-4">Note: User must be in Firebase Auth</div>
@@ -1715,22 +1763,22 @@ Capabilities & Instructions:
                 );
 
                 return (
-                    <div className="min-h-screen bg-slate-50 text-slate-900 pb-12 font-sans">
-                        <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+                    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white pb-12 font-sans">
+                        <header className="bg-white dark:bg-slate-800 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
                             <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="flex items-center gap-6">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-indigo-600 rounded-lg text-white">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-circle-check" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
                                         </div>
-                                        <h1 className="text-xl font-bold text-slate-800 tracking-tight">Project Hub</h1>
+                                        <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Project Hub</h1>
                                     </div>
-                                    <nav className="flex items-center bg-slate-100 p-1 rounded-xl">
-                                        <button onClick={() => setActiveTab('list')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>
+                                    <nav className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                                        <button onClick={() => setActiveTab('list')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'list' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-list" aria-hidden="true"><path d="M3 12h.01"></path><path d="M3 18h.01"></path><path d="M3 6h.01"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M8 6h13"></path></svg>
                                             List
                                         </button>
-                                        <button onClick={() => setActiveTab('dashboard')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'dashboard' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>
+                                        <button onClick={() => setActiveTab('dashboard')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'dashboard' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-layout-dashboard" aria-hidden="true"><rect width="7" height="9" x="3" y="3" /><rect width="7" height="5" x="14" y="3" /><rect width="7" height="9" x="14" y="12" /><rect width="7" height="5" x="3" y="16" /></svg>
                                             Dashboard
                                         </button>
@@ -1752,6 +1800,9 @@ Capabilities & Instructions:
                                             )}
                                         </>
                                     )}
+                                    <button onClick={toggleTheme} className="p-2 text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400">
+                                        {theme === 'dark' ? <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}
+                                    </button>
                                     <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></svg></button>
                                 </div>
 
@@ -1761,7 +1812,7 @@ Capabilities & Instructions:
                         <main className="max-w-7xl mx-auto px-4 py-8">
                             {activeTab === 'list' ? (
                                 <>
-                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
+                                    <div className="bg-white dark:bg-slate-800 dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
                                         <FormInput label="Search" value={searchTerm} onChange={setSearchTerm} placeholder="Keywords..." />
 
                                         <div className="space-y-1">
@@ -1825,7 +1876,7 @@ Capabilities & Instructions:
                                     <div className="space-y-4">
                                         {filteredProjects.map(project => <ProjectCard key={project.id} project={project} onEdit={handleOpenModal} onDelete={handleDelete} isAdmin={isAdmin} />)}
                                         {filteredProjects.length === 0 && (
-                                            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
+                                            <div className="bg-white dark:bg-slate-800 dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-12 text-center">
                                                 <p className="text-slate-400 font-bold">No projects found matching your filters.</p>
                                             </div>
                                         )}
@@ -1833,15 +1884,15 @@ Capabilities & Instructions:
                                 </>
                             ) : (
                                 <div className="space-y-8">
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bar-chart-3"><path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></svg></div>
-                                            <h2 className="font-bold text-slate-800">Portfolio Analytics</h2>
+                                            <h2 className="font-bold text-slate-800 dark:text-slate-100">Portfolio Analytics</h2>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Year Filter:</label>
                                             <select
-                                                className="h-10 px-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-indigo-600 outline-none focus:ring-2 focus:ring-indigo-500"
+                                                className="h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-black text-indigo-600 outline-none focus:ring-2 focus:ring-indigo-500"
                                                 value={dashboardYear}
                                                 onChange={(e) => setDashboardYear(e.target.value)}
                                             >
@@ -1863,7 +1914,7 @@ Capabilities & Instructions:
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-amber-100 text-amber-600 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg></div>
                                                 <div>
-                                                    <h3 className="font-black text-slate-800 text-sm">Belum SDHO Queue</h3>
+                                                    <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm">Belum SDHO Queue</h3>
                                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Pending Acceptance Confirmation</p>
                                                 </div>
                                             </div>
@@ -1879,18 +1930,18 @@ Capabilities & Instructions:
                                                 <button
                                                     key={p.id}
                                                     onClick={() => handleProjectClick(p.id)}
-                                                    className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-400 text-left group transition-all"
+                                                    className="bg-white dark:bg-slate-800 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-indigo-400 text-left group transition-all"
                                                 >
                                                     <div className="flex justify-between items-start mb-2">
                                                         <span className="text-[9px] font-black text-slate-300 uppercase tabular-nums">ID: {p.projNumber || 'N/A'}</span>
                                                         <span className="text-xs font-black text-amber-600 tabular-nums">{formatShortCurrency(p.value)}</span>
                                                     </div>
-                                                    <h4 className="font-bold text-slate-800 text-xs truncate mb-1 group-hover:text-indigo-600">{p.projName}</h4>
-                                                    <p className="text-[10px] text-slate-500 font-medium truncate">{p.customer}</p>
+                                                    <h4 className="font-bold text-slate-800 dark:text-slate-100 text-xs truncate mb-1 group-hover:text-indigo-600">{p.projName}</h4>
+                                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">{p.customer}</p>
                                                 </button>
                                             ))}
                                             {dashboardData?.belumSdhoProjects.length === 0 && (
-                                                <div className="col-span-full py-8 text-center bg-white rounded-xl border border-dashed border-slate-300">
+                                                <div className="col-span-full py-8 text-center bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-600">
                                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No projects in Belum SDHO status</p>
                                                 </div>
                                             )}
@@ -1912,7 +1963,7 @@ Capabilities & Instructions:
                                                             </span>
                                                             <span className="text-indigo-600">{formatShortCurrency(p.value)}</span>
                                                         </div>
-                                                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
                                                             <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${(p.value / (dashboardData.topProjectsByValue[0]?.value || 1)) * 100}%` }}></div>
                                                         </div>
                                                     </button>
@@ -1934,7 +1985,7 @@ Capabilities & Instructions:
                                                             </span>
                                                             <span className="text-emerald-600">{formatShortCurrency(p.sisaMandays)}</span>
                                                         </div>
-                                                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
                                                             <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${(p.sisaMandays / (dashboardData.topProjectsByMandays[0]?.sisaMandays || 1)) * 100}%` }}></div>
                                                         </div>
                                                     </button>
@@ -1956,7 +2007,7 @@ Capabilities & Instructions:
                                                             </span>
                                                             <span className="text-indigo-600">{count} Projects</span>
                                                         </div>
-                                                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                                                             <div className="bg-blue-500 h-full rounded-full transition-all duration-500" style={{ width: `${(count / (dashboardData.topPMs[0]?.[1] || 1)) * 100}%` }}></div>
                                                         </div>
                                                     </button>
@@ -1978,7 +2029,7 @@ Capabilities & Instructions:
                                                             </span>
                                                             <span className="text-indigo-600">{formatShortCurrency(val)}</span>
                                                         </div>
-                                                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                                                             <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${(val / (dashboardData.topCustomers[0]?.[1] || 1)) * 100}%` }}></div>
                                                         </div>
                                                     </button>
@@ -1991,10 +2042,10 @@ Capabilities & Instructions:
                         </main>
                         {isModalOpen && (
                             <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-                                <div className="bg-white p-8 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+                                <div className="bg-white dark:bg-slate-800 dark:bg-slate-800 p-8 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
                                     <div className="flex justify-between items-center mb-6">
-                                        <h2 className="text-xl font-black text-slate-800 tracking-tight">{editingProject ? 'Edit Project' : 'New Project'}</h2>
-                                        <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                                        <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight">{editingProject ? 'Edit Project' : 'New Project'}</h2>
+                                        <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:text-slate-300">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                                         </button>
                                     </div>
@@ -2053,12 +2104,18 @@ Capabilities & Instructions:
                                                 <FormInput label="Solution" value={formData.solusi} onChange={v => setFormData({ ...formData, solusi: v })} placeholder="Technical approach..." disabled={!isAdmin} />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Status Note</label>
-                                                <textarea disabled={!isAdmin} className="w-full h-24 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold text-slate-700 text-sm disabled:opacity-75" value={formData.note} onChange={e => setFormData({ ...formData, note: e.target.value })} placeholder="Current progress or roadblocks..."></textarea>
+                                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1 mb-1.5 block">Project Notes & Remarks</label>
+                                                <textarea 
+                                                    disabled={!isAdmin} 
+                                                    className="w-full h-32 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-semibold text-slate-700 dark:text-slate-200 text-sm disabled:opacity-75 shadow-inner placeholder:text-slate-400 dark:placeholder:text-slate-600" 
+                                                    value={formData.note} 
+                                                    onChange={e => setFormData({ ...formData, note: e.target.value })} 
+                                                    placeholder="Document current progress, critical blockers, or important updates here..."
+                                                ></textarea>
                                             </div>
 
-                                            <div className="md:col-span-2 pt-4 border-t border-slate-100">
-                                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Project Attachments</label>
+                                            <div className="md:col-span-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Project Attachments</label>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                                     {['sdho', 'mom', 'kickoff', 'report'].map(key => (
                                                         <FileDropZone
@@ -2074,9 +2131,9 @@ Capabilities & Instructions:
                                         </div>
 
                                         <div className="flex gap-4 pt-6">
-                                            <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 h-12 rounded-xl font-bold text-slate-400 border-2 border-slate-100 hover:bg-slate-50 transition-colors">Discard</button>
+                                            <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 h-12 rounded-xl font-bold text-slate-400 dark:text-slate-500 border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 dark:bg-transparent transition-colors">Discard</button>
                                             {isAdmin && (
-                                                <button type="submit" className="flex-1 h-12 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-95">
+                                                <button type="submit" className="flex-1 h-12 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95">
                                                     {editingProject ? 'Update Project' : 'Launch Project'}
                                                 </button>
                                             )}
@@ -2088,17 +2145,17 @@ Capabilities & Instructions:
 
                         {saveSuccessModal && (
                             <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="save-success-title">
-                                <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-8 text-center relative">
-                                    <button type="button" onClick={() => setSaveSuccessModal(null)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg" aria-label="Close">
+                                <div className="bg-white dark:bg-slate-800 dark:bg-slate-800 rounded-3xl w-full max-w-md shadow-2xl p-8 text-center relative">
+                                    <button type="button" onClick={() => setSaveSuccessModal(null)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:text-slate-300 p-1 rounded-lg" aria-label="Close">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                                     </button>
                                     <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-5">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
                                     </div>
-                                    <h3 id="save-success-title" className="text-xl font-black text-slate-800 tracking-tight mb-2">
+                                    <h3 id="save-success-title" className="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight mb-2">
                                         {saveSuccessModal === 'updated' ? 'Project updated' : 'Project created'}
                                     </h3>
-                                    <p className="text-sm font-medium text-slate-500 mb-8">
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-8">
                                         {saveSuccessModal === 'updated' ? 'Your changes have been saved to the database.' : 'The new project has been saved to the database.'}
                                     </p>
                                     <button type="button" onClick={() => setSaveSuccessModal(null)} className="w-full h-12 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 active:scale-[0.98]">
@@ -2121,16 +2178,49 @@ Capabilities & Instructions:
                         )}
 
                         <style>{`
-                .btn-primary { @apply inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-sm active:scale-95; }
-                .btn-secondary { @apply inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all shadow-sm; }
-                .filter-label { @apply block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1; }
-                .filter-input { @apply w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-xs font-bold text-slate-700 transition-all; }
-                .dashboard-card { @apply bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow flex flex-col; }
-                .dashboard-title { @apply text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2; }
+                .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; background-color: #4f46e5; color: white; font-weight: 700; border-radius: 0.75rem; transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+                .btn-primary:hover { background-color: #4338ca; }
+                .btn-primary:active { transform: scale(0.95); }
+                .btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; background-color: white; border: 1px solid #e2e8f0; color: #334155; font-weight: 700; border-radius: 0.75rem; transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+                .btn-secondary:hover { background-color: #f8fafc; }
+                .dark .btn-secondary { background-color: #0f172a; border-color: #334155; color: #e2e8f0; }
+                .dark .btn-secondary:hover { background-color: #1e293b; }
+                .filter-label { display: block; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.375rem; margin-left: 0.25rem; }
+                .filter-input { width: 100%; height: 2.5rem; padding: 0 0.75rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; outline: none; font-size: 0.75rem; font-weight: 700; color: #334155; transition: all 0.15s; appearance: auto; }
+                .filter-input:focus { box-shadow: 0 0 0 2px #6366f1; border-color: #6366f1; }
+                .dark .filter-input { background-color: #0f172a; border-color: #334155; color: #e2e8f0; }
+                .dark .filter-input:focus { box-shadow: 0 0 0 2px #6366f1; }
+                .dark .filter-input option { background-color: #1e293b; color: #e2e8f0; }
+                .dashboard-card { background-color: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: box-shadow 0.15s; display: flex; flex-direction: column; }
+                .dashboard-card:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.07); }
+                .dark .dashboard-card { background-color: #1e293b; border-color: #334155; }
+                .dashboard-title { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
                 .prose { max-width: 100%; font-size: 0.75rem; }
                 .prose table { width: 100%; border-collapse: collapse; margin: 8px 0; }
                 .prose th, .prose td { border: 1px solid #e2e8f0; padding: 4px 8px; text-align: left; }
+                .dark .prose th, .dark .prose td { border-color: #334155; }
                 .prose th { background: #f8fafc; }
+                .dark .prose th { background: #1e293b; }
+                
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 4px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: #e2e8f0;
+                    border-radius: 9999px;
+                }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: #334155;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background-color: #cbd5e1;
+                }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background-color: #475569;
+                }
               `}</style>
                     </div >
                 );
