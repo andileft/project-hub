@@ -1192,7 +1192,6 @@ let y, m, d;
                 const [formSubmitError, setFormSubmitError] = useState(null);
                 const [toast, setToast] = useState(null);
                 const toastTimerRef = useRef(null);
-                const okButtonRef = useRef(null);
 
                 const clearToast = () => {
                     if (toastTimerRef.current) {
@@ -1252,12 +1251,6 @@ let y, m, d;
                     window.addEventListener('keydown', handleEsc);
                     return () => window.removeEventListener('keydown', handleEsc);
                 }, [saveSuccessModal, isModalOpen, toast]);
-
-                useEffect(() => {
-                  if (saveSuccessModal && okButtonRef.current) {
-                    okButtonRef.current.focus();
-                  }
-                }, [saveSuccessModal]);
 
                 useEffect(() => () => {
                     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -2249,9 +2242,9 @@ let y, m, d;
                                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-8">
                                         {saveSuccessModal === 'updated' ? 'Your changes have been saved to the database.' : 'The new project has been saved to the database.'}
                                     </p>
-<button type="button" onClick={() => setSaveSuccessModal(null)} onKeyDown={(e) => { if (e.key === 'Enter') setSaveSuccessModal(null); }} ref={okButtonRef} className="w-full h-12 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95">
-    OK
-</button>
+                                    <button type="button" onClick={() => setSaveSuccessModal(null)} onKeyDown={(e) => { if (e.key === 'Enter') setSaveSuccessModal(null); }} className="w-full h-12 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 active:scale-[0.98]" autoFocus>
+                                        OK
+                                    </button>
                                 </div>
                             </div>
                         )}
