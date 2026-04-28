@@ -22,3 +22,9 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Sensitive files - do not commit
+INTEGRATION_PLAN.md
+api_instructions.md
+firestore.rules
+storage.rules
