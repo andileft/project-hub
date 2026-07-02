@@ -61,6 +61,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Projects
@@ -231,20 +232,26 @@ const App = () => {
         setUser(currentUser);
         setIsAuthenticated(true);
         try {
-          // Fetch user role from Firestore 'users' collection
+          // Fetch user profile from Firestore 'users' collection
           const userDocRef = doc(db, 'users', currentUser.uid);
           const userDocSnap = await getDoc(userDocRef);
           if (userDocSnap.exists()) {
-            const role = userDocSnap.data().role;
+            const data = userDocSnap.data();
+            setUserProfile(data);
+            const role = data.role;
             setIsAdmin(role === 'admin');
           } else {
+            setUserProfile({});
             setIsAdmin(false);
           }
-        } catch {
+        } catch (err) {
+          console.error("Error fetching user profile:", err);
+          setUserProfile({});
           setIsAdmin(false);
         }
       } else {
         setUser(null);
+        setUserProfile(null);
         setIsAuthenticated(false);
         setIsAdmin(false);
       }
@@ -254,12 +261,20 @@ const App = () => {
 
   // Projects listener
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || userProfile === null) return;
     setLoading(true);
     const colRef = collection(db, COLLECTION_PATH);
     const unsubscribe = onSnapshot(colRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       data.sort((a, b) => (b.projNumber || '').localeCompare(a.projNumber || ''));
+      
+      // If PM (user has no role), filter projects by PM name
+      const isPM = !userProfile.role;
+      if (isPM) {
+        const pmName = (userProfile.name || user.displayName || '').trim().toLowerCase();
+        data = data.filter(p => (p.pm || '').trim().toLowerCase() === pmName);
+      }
+
       setProjects(data);
       setLoading(false);
       setError(null);
@@ -269,7 +284,7 @@ const App = () => {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, userProfile, user]);
 
   // Theme effect
   useEffect(() => {
