@@ -28,3 +28,19 @@ INTEGRATION_PLAN.md
 api_instructions.md
 firestore.rules
 storage.rules
+
+# backups
+backups/
+
+# Build output
+dist/
+dist-ssr/
+*.local
+
+# Graphify
+graphify-out/
+
+# Temporary logs
+npm_error.txt
+npm_output.txt
+
