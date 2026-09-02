@@ -11,6 +11,7 @@ import {
   FileBarChartIcon,
   DatabaseIcon,
   BanknoteIcon,
+  BarChart3Icon,
   LightbulbIcon,
   Clock3Icon,
   ShieldCheckIcon,
@@ -164,6 +165,16 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin }) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleViewPerformance = (e) => {
+    e.stopPropagation();
+    if (!project.projNumber) {
+      alert("Project number is missing for this card.");
+      return;
+    }
+    const url = `https://data-center-performance-dashboard-700684111556.us-west1.run.app/?screen=project&projectNo=${encodeURIComponent(project.projNumber)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const fetchFinancials = async (e) => {
     if (e) e.stopPropagation();
     if (showFinancials) {
@@ -283,22 +294,29 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin }) => {
               {loadingFinancials ? <Loader2Icon className="h-4 w-4 animate-spin" /> : <BanknoteIcon className="h-4 w-4" />}
             </button>
             <button
+              onClick={handleViewPerformance}
+              className="p-2 rounded-lg transition-all flex items-center justify-center gap-1 flex-1 lg:flex-none bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-violet-600 hover:bg-violet-50 border border-slate-100 dark:border-slate-800"
+              title="View Financial Performance"
+            >
+              <BarChart3Icon className="h-4 w-4" />
+            </button>
+            <button
               onClick={handleGoToCpc}
-              className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+              className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all hidden lg:flex items-center justify-center flex-1 lg:flex-none [@media(pointer:coarse)]:!hidden"
               title="Go to CPC"
             >
               <div className="bg-[#1e5bb8] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none">CPC</div>
             </button>
             <button
               onClick={handleGoToSimplify}
-              className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+              className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all hidden lg:flex items-center justify-center flex-1 lg:flex-none [@media(pointer:coarse)]:!hidden"
               title="Go to Simplify"
             >
               <div className="bg-[#f39c12] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none">SIMPLIFY</div>
             </button>
             <button
               onClick={handleGoToIserve}
-              className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+              className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-indigo-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all hidden lg:flex items-center justify-center flex-1 lg:flex-none [@media(pointer:coarse)]:!hidden"
               title="Go to iServe"
             >
               <div className="bg-[#800000] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1">
@@ -307,7 +325,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin }) => {
             </button>
             <button
               onClick={handleGoToFinancials}
-              className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-emerald-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all flex items-center justify-center flex-1 lg:flex-none"
+              className="p-1 bg-slate-50 dark:bg-slate-900 hover:bg-emerald-50 border border-slate-100 dark:border-slate-800 rounded-lg transition-all hidden lg:flex items-center justify-center flex-1 lg:flex-none [@media(pointer:coarse)]:!hidden"
               title="Go to Financials"
             >
               <div className="bg-[#10b981] text-white text-[9px] font-black px-1.5 py-0.5 rounded-[4px] shadow-sm tracking-tight leading-none flex items-center gap-1 uppercase">
@@ -433,7 +451,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin }) => {
             {isAdmin && (
               <button
                 onClick={handleScrapeFinancials}
-                className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-tighter"
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-tighter [@media(pointer:coarse)]:!hidden"
                 title="Scrape Financials from CPC"
               >
                 <DatabaseIcon className="h-2.5 w-2.5" />
@@ -498,7 +516,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin }) => {
             {isAdmin && (
               <button
                 onClick={handleScrapeTeam}
-                className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-tighter"
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-all text-[9px] font-black uppercase tracking-tighter [@media(pointer:coarse)]:!hidden"
                 title="Scrape Team from CPC"
               >
                 <DatabaseIcon className="h-2.5 w-2.5" />
