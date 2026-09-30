@@ -7,7 +7,9 @@ import {
   PlusIcon,
   SunIcon,
   MoonIcon,
-  LogOutIcon
+  LogOutIcon,
+  LayersIcon,
+  Rows3Icon
 } from './Icons';
 
 const Header = ({
@@ -20,7 +22,9 @@ const Header = ({
   onLogout,
   theme,
   onToggleTheme,
-  isAuthenticated
+  isAuthenticated,
+  viewMode,
+  onToggleViewMode
 }) => {
   if (!isAuthenticated) return null;
 
@@ -78,6 +82,15 @@ const Header = ({
                 </>
               )}
             </>
+          )}
+          {activeTab === 'list' && (
+            <button
+              onClick={onToggleViewMode}
+              title={viewMode === 'classic' ? 'New view' : 'Classic view'}
+              className="p-2 text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400"
+            >
+              {viewMode === 'classic' ? <LayersIcon className="h-5 w-5" /> : <Rows3Icon className="h-5 w-5" />}
+            </button>
           )}
           <button onClick={onToggleTheme} className="p-2 text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400">
             {theme === 'dark' ? (

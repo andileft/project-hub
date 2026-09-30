@@ -7,5 +7,10 @@ export { default as ChatWindow } from './ChatWindow';
 export { default as FilterBar } from './FilterBar';
 export { default as Header } from './Header';
 export { default as ProjectCard } from './ProjectCard';
+export { default as Morph } from './Morph';
+export { default as ProjectRow } from './ProjectRow';
+export { default as GroupedProjectList, buildGroups } from './GroupedProjectList';
+export { default as ListViewToolbar, GROUP_OPTIONS } from './ListViewToolbar';
+export { default as BackToTopButton } from './BackToTopButton';
 // Dashboard and ProjectModal removed (lazy loaded)
 export * from './Icons';

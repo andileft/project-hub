@@ -29,14 +29,24 @@ export function getStatusClasses(status) {
 }
 
 /**
+ * Formats a number as short value (B for billions, M for millions) without a currency prefix.
+ * Mirrors formatShortCurrency so values and counters (e.g. mandays) share one style.
+ * @param {number} val - The value to format
+ * @returns {string} Formatted string (e.g., "1.5B", "2.3M", "1,234")
+ */
+export function formatShortNumber(val) {
+  if (val >= 1e9) return `${(val / 1e9).toFixed(1)}B`;
+  if (val >= 1e6) return `${(val / 1e6).toFixed(1)}M`;
+  return `${val?.toLocaleString()}`;
+}
+
+/**
  * Formats a number as short currency (B for billions, M for millions).
  * @param {number} val - The value to format
  * @returns {string} Formatted currency string (e.g., "Rp 1.5B", "Rp 2.3M", "Rp 1,234")
  */
 export function formatShortCurrency(val) {
-  if (val >= 1e9) return `Rp ${(val / 1e9).toFixed(1)}B`;
-  if (val >= 1e6) return `Rp ${(val / 1e6).toFixed(1)}M`;
-  return `Rp ${val?.toLocaleString()}`;
+  return `Rp ${formatShortNumber(val)}`;
 }
 
 /**

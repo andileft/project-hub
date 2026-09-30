@@ -26,7 +26,7 @@ import {
   Loader2Icon
 } from './Icons';
 
-const ProjectCard = ({ project, onEdit, onDelete, isAdmin }) => {
+const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false }) => {
   const statusStyle = getStatusClasses(project.status);
   const [showTeam, setShowTeam] = useState(false);
   const [team, setTeam] = useState([]);
@@ -234,7 +234,9 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin }) => {
   };
 
   return (
-    <div onClick={() => onEdit(project)} className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 border-l-4 ${statusStyle.border} p-5 hover:shadow-md transition-all group relative overflow-hidden flex flex-col gap-4 cursor-pointer`}>
+    <div onClick={() => onEdit(project)} className={embedded
+      ? 'p-5 group relative flex flex-col gap-4'
+      : `bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 border-l-4 ${statusStyle.border} p-5 hover:shadow-md transition-all group relative overflow-hidden flex flex-col gap-4 cursor-pointer`}>
       <div className="flex flex-col lg:flex-row lg:items-start gap-6">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5">

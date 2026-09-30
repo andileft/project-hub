@@ -23,15 +23,40 @@ import {
   getDownloadURL,
   deleteObject
 } from '../utils/firebase';
-import { Header, FilterBar, ProjectCard, Toast } from '../components';
+import { Header, FilterBar, ProjectCard, Toast, GroupedProjectList, ListViewToolbar, BackToTopButton, buildGroups } from '../components';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { formatShortCurrency } from '../utils/formatting';
+import { collectSolutionOptions, matchesSolution } from '../utils/solutions';
 import { TECH_HUB_URL } from '../constants/config';
 import { parseCSVFile } from '../utils/parsers';
  import { extractTextFromFile, uploadFileToStorage, deleteFileFromStorageByUrl } from './utils/file-utils.js';
 
 const Dashboard = lazy(() => import('../components/Dashboard'));
 const ProjectModal = lazy(() => import('../components/ProjectModal'));
+
+// Persisted list view preferences
+const VIEW_MODE_KEY = 'ph_view_mode';
+const GROUP_BY_KEY = 'ph_group_by';
+const VIEW_MODES = ['new', 'classic'];
+const GROUP_BYS = ['none', 'status', 'customer', 'pm', 'solusi'];
+
+const readStored = (key, fallback, allowed) => {
+  try {
+    const value = localStorage.getItem(key);
+    if (value && (!allowed || allowed.includes(value))) return value;
+  } catch (e) {
+    // localStorage unavailable (private mode / blocked) - use fallback
+  }
+  return fallback;
+};
+
+const writeStored = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    // ignore storage errors
+  }
+};
 
 // Login form component
 const LoginForm = ({ onLogin, isLoggingIn }) => (
@@ -91,6 +116,12 @@ const App = () => {
   });
   const [searchTerm, setSearchTerm] = useState('');
 
+  // List view mode: 'new' = stacked + grouped, 'classic' = today's full cards
+  const [viewMode, setViewMode] = useState(() => readStored(VIEW_MODE_KEY, 'new', VIEW_MODES));
+  const [groupBy, setGroupBy] = useState(() => readStored(GROUP_BY_KEY, 'status', GROUP_BYS));
+  const [expandedIds, setExpandedIds] = useState(() => new Set());
+  const [collapsedGroups, setCollapsedGroups] = useState(() => new Set());
+
   // Form data
   const [formData, setFormData] = useState({
     projName: '',
@@ -118,7 +149,7 @@ const App = () => {
   // Derived filter options
   const filterOptions = useMemo(() => {
     const customers = [...new Set(projects.map(p => p.customer).filter(Boolean))].sort();
-    const solutions = [...new Set(projects.map(p => p.solusi).filter(Boolean))].sort();
+    const solutions = collectSolutionOptions(projects);
     const pms = [...new Set(projects.map(p => p.pm).filter(Boolean))].sort();
     const years = [...new Set(projects.map(p => p.start?.split('-')[0]).filter(Boolean).filter(y => Number(y) >= 2019))].sort((a, b) => Number(b) - Number(a));
 
@@ -153,7 +184,7 @@ const App = () => {
        // Customer
        if (filters.customer && (p.customer || '').trim() !== (filters.customer || '').trim()) return false;
        // Solution
-       if (filters.solution && (p.solusi || '').trim() !== (filters.solution || '').trim()) return false;
+       if (filters.solution && !matchesSolution(p.solusi, filters.solution)) return false;
        // PM
        if (filters.pm && (p.pm || '').trim() !== (filters.pm || '').trim()) return false;
        // Year
@@ -290,6 +321,18 @@ const App = () => {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
+
+  // Persist list view mode
+  useEffect(() => {
+    writeStored(VIEW_MODE_KEY, viewMode);
+  }, [viewMode]);
+
+  // Persist grouping and reset expand/collapse state when grouping changes
+  useEffect(() => {
+    writeStored(GROUP_BY_KEY, groupBy);
+    setExpandedIds(new Set());
+    setCollapsedGroups(new Set());
+  }, [groupBy]);
 
   // Handlers
   const toggleTheme = useCallback(() => {
@@ -566,6 +609,32 @@ const App = () => {
     setSearchTerm('');
   }, []);
 
+  // Stacked (New) view helpers
+  const groupKeys = useMemo(() => buildGroups(filteredProjects, groupBy).map(g => g.key), [filteredProjects, groupBy]);
+
+  const toggleViewMode = useCallback(() => {
+    setViewMode(prev => (prev === 'classic' ? 'new' : 'classic'));
+  }, []);
+
+  const handleToggleCard = useCallback((id) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleToggleGroup = useCallback((key) => {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const expandAllGroups = useCallback(() => setCollapsedGroups(new Set()), []);
+  const collapseAllGroups = useCallback(() => setCollapsedGroups(new Set(groupKeys)), [groupKeys]);
+
   const handleAttachmentUpload = useCallback(async (key, file) => {
     try {
       // 1. Upload to Firebase Storage
@@ -645,6 +714,8 @@ const App = () => {
         theme={theme}
         onToggleTheme={toggleTheme}
         isAuthenticated={isAuthenticated}
+        viewMode={viewMode}
+        onToggleViewMode={toggleViewMode}
       />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
@@ -660,18 +731,39 @@ const App = () => {
               onReset={resetFilters}
             />
 
+             {!loading && !error && filteredProjects.length > 0 && viewMode === 'new' && (
+               <ListViewToolbar
+                 groupBy={groupBy}
+                 onGroupByChange={setGroupBy}
+                 onExpandAll={expandAllGroups}
+                 onCollapseAll={collapseAllGroups}
+               />
+             )}
+
              {loading ? (
                <SkeletonLoader type="card" count={6} />
              ) : error ? (
               <div className="text-center py-12 text-red-600">{error}</div>
             ) : filteredProjects.length === 0 ? (
               <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700"><p className="text-slate-500 dark:text-slate-400">No projects match the current filters.</p></div>
-            ) : (
+            ) : viewMode === 'classic' ? (
               <div className="flex flex-col gap-6">
                 {filteredProjects.map(project => (
                   <ProjectCard key={project.id} project={project} onEdit={handleOpenModal} onDelete={handleDelete} isAdmin={isAdmin} />
                 ))}
               </div>
+            ) : (
+              <GroupedProjectList
+                projects={filteredProjects}
+                groupBy={groupBy}
+                expandedIds={expandedIds}
+                onToggleCard={handleToggleCard}
+                collapsedGroups={collapsedGroups}
+                onToggleGroup={handleToggleGroup}
+                isAdmin={isAdmin}
+                onEdit={handleOpenModal}
+                onDelete={handleDelete}
+              />
             )}
           </>
         )}
@@ -723,6 +815,8 @@ const App = () => {
        )}
 
       {toast && <Toast toast={toast} onClear={() => setToast(null)} />}
+
+      <BackToTopButton />
 
       {/* Hidden file input for CSV import */}
       <input
