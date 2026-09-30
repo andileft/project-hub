@@ -53,24 +53,28 @@ const Header = ({
             </button>
           </nav>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4 flex-wrap">
           {activeTab === 'list' && (
             <>
               {isAdmin && (
                 <>
                   <button
                     onClick={onTruncate}
-                    className="h-10 px-4 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all flex items-center gap-2 border border-red-100"
+                    title="Truncate DB"
+                    aria-label="Truncate DB"
+                    className="h-10 px-3 md:px-4 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all flex items-center gap-2 border border-red-100"
                   >
                     <Trash2Icon className="h-4 w-4" />
-                    Truncate DB
+                    <span className="hidden md:inline">Truncate DB</span>
                   </button>
                   <button
                     onClick={onImport}
-                    className="h-10 px-4 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-xl transition-all flex items-center gap-2 border border-slate-200 dark:border-slate-600"
+                    title="Import"
+                    aria-label="Import"
+                    className="h-10 px-3 md:px-4 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-xl transition-all flex items-center gap-2 border border-slate-200 dark:border-slate-600"
                   >
                     <UploadIcon className="h-4 w-4" />
-                    Import
+                    <span className="hidden md:inline">Import</span>
                   </button>
                   <button
                     onClick={onCreate}
