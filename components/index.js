@@ -13,5 +13,6 @@ export { default as GroupedProjectList, buildGroups } from './GroupedProjectList
 export { default as ListViewToolbar, GROUP_OPTIONS } from './ListViewToolbar';
 export { default as BackToTopButton } from './BackToTopButton';
 export { default as LaborBudgetBadge } from './LaborBudgetBadge';
+export { default as MemberAssignmentBadge } from './MemberAssignmentBadge';
 // Dashboard and ProjectModal removed (lazy loaded)
 export * from './Icons';

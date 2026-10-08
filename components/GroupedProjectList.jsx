@@ -96,7 +96,8 @@ const GroupedProjectList = ({
   isAdmin,
   onEdit,
   onDelete,
-  laborBudgets
+  laborBudgets,
+  memberAssignments
 }) => {
   const groups = useMemo(() => buildGroups(projects, groupBy), [projects, groupBy]);
   const showHeaders = groupBy && groupBy !== 'none';
@@ -140,6 +141,7 @@ const GroupedProjectList = ({
                     onEdit={onEdit}
                     onDelete={onDelete}
                     laborBudget={laborBudgets?.[p.id]}
+                    memberAssignment={memberAssignments?.[p.id]}
                   />
                 ))}
               </div>

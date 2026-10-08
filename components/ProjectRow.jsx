@@ -3,6 +3,7 @@ import { getStatusClasses, formatShortNumber, safeParseFloat } from '../utils/fo
 import { Building2Icon, UserCogIcon, ChevronDownIcon } from './Icons';
 import ProjectCard from './ProjectCard';
 import LaborBudgetBadge from './LaborBudgetBadge';
+import MemberAssignmentBadge from './MemberAssignmentBadge';
 import Morph from './Morph';
 
 const GRID_TRANSITION = (rows) => ({
@@ -16,7 +17,7 @@ const GRID_TRANSITION = (rows) => ({
  * `groupBy` controls which of the grouping fields is hidden because the group
  * header already shows it.
  */
-const CompactRow = ({ project, groupBy, expanded, onToggle, laborBudget }) => {
+const CompactRow = ({ project, groupBy, expanded, onToggle, laborBudget, memberAssignment }) => {
   const hideCustomer = groupBy === 'customer';
   const hidePm = groupBy === 'pm';
   const mandays = formatShortNumber(safeParseFloat(project.sisaMandays));
@@ -53,6 +54,7 @@ const CompactRow = ({ project, groupBy, expanded, onToggle, laborBudget }) => {
         {mandays}
       </span>
       <LaborBudgetBadge budget={laborBudget} />
+      <MemberAssignmentBadge assignment={memberAssignment} />
       <ChevronDownIcon className={`h-3.5 w-3.5 shrink-0 text-slate-300 group-hover:text-slate-500 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} />
     </button>
   );
@@ -61,7 +63,7 @@ const CompactRow = ({ project, groupBy, expanded, onToggle, laborBudget }) => {
 /**
  * One card shell that morphs between the compact row and the full ProjectCard in place.
  */
-const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onDelete, laborBudget }) => {
+const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onDelete, laborBudget, memberAssignment }) => {
   const statusStyle = getStatusClasses(project.status);
 
   return (
@@ -71,7 +73,7 @@ const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onD
           className={`min-h-0 overflow-hidden transition-opacity duration-200 ${expanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           aria-hidden={expanded}
         >
-          <CompactRow project={project} groupBy={groupBy} expanded={expanded} onToggle={onToggle} laborBudget={laborBudget} />
+          <CompactRow project={project} groupBy={groupBy} expanded={expanded} onToggle={onToggle} laborBudget={laborBudget} memberAssignment={memberAssignment} />
         </div>
       </div>
 
@@ -94,6 +96,7 @@ const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onD
           onEdit={onEdit}
           onDelete={onDelete}
           laborBudget={laborBudget}
+          memberAssignment={memberAssignment}
         />
       </Morph>
     </div>

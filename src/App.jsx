@@ -29,6 +29,7 @@ import { formatShortCurrency } from '../utils/formatting';
 import { collectSolutionOptions, matchesSolution } from '../utils/solutions';
 import { TECH_HUB_URL } from '../constants/config';
 import { useLaborBudgets } from '../hooks/useLaborBudgets';
+import { useMemberAssignments } from '../hooks/useMemberAssignments';
 import { parseCSVFile } from '../utils/parsers';
  import { extractTextFromFile, uploadFileToStorage, deleteFileFromStorageByUrl } from './utils/file-utils.js';
 
@@ -206,6 +207,9 @@ const App = () => {
 
   // Remaining labor budget per visible project (cached, lazily fetched)
   const laborBudgets = useLaborBudgets(filteredProjects);
+
+  // Current member assignment per visible project (cached, lazily fetched)
+  const memberAssignments = useMemberAssignments(filteredProjects);
 
   // Dashboard data
   const dashboardData = useMemo(() => {
@@ -753,7 +757,7 @@ const App = () => {
             ) : viewMode === 'classic' ? (
               <div className="flex flex-col gap-6">
                 {filteredProjects.map(project => (
-                  <ProjectCard key={project.id} project={project} onEdit={handleOpenModal} onDelete={handleDelete} isAdmin={isAdmin} laborBudget={laborBudgets[project.id]} />
+                  <ProjectCard key={project.id} project={project} onEdit={handleOpenModal} onDelete={handleDelete} isAdmin={isAdmin} laborBudget={laborBudgets[project.id]} memberAssignment={memberAssignments[project.id]} />
                 ))}
               </div>
             ) : (
@@ -768,6 +772,7 @@ const App = () => {
                 onEdit={handleOpenModal}
                 onDelete={handleDelete}
                 laborBudgets={laborBudgets}
+                memberAssignments={memberAssignments}
               />
             )}
           </>
