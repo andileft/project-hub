@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserIcon } from './Icons';
+import { HardHat } from 'lucide-react';
 
 // Index = severity from useLaborBudgets: 0 red, 1 amber, 2 green, 3 off.
 const SEVERITY_DOT = [
@@ -27,7 +27,7 @@ const tooltipText = ({ state, value, worst, sev }) => {
 
 /**
  * Presence-style indicator for the remaining labor budget of a project:
- * a person silhouette with a status lamp at the bottom-right corner.
+ * a worker's hard hat with a status lamp at the bottom-right corner.
  * The lamp reflects the worst WBS severity (one red WBS => red badge).
  * Plain spans only (safe inside the CompactRow <button>).
  */
@@ -46,7 +46,7 @@ const LaborBudgetBadge = ({ budget }) => {
         sev: budget?.sev
       })}
     >
-      <UserIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
+      <HardHat className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
       <span
         className={`absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full ring-2 ring-white dark:ring-slate-800 ${dotClass}${state === 'loading' ? ' animate-pulse' : ''}`}
       />
