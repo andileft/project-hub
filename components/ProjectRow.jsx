@@ -4,6 +4,7 @@ import { Building2Icon, UserCogIcon, ChevronDownIcon } from './Icons';
 import ProjectCard from './ProjectCard';
 import LaborBudgetBadge from './LaborBudgetBadge';
 import MemberAssignmentBadge from './MemberAssignmentBadge';
+import EndDateBadge from './EndDateBadge';
 import Morph from './Morph';
 
 const GRID_TRANSITION = (rows) => ({
@@ -55,6 +56,7 @@ const CompactRow = ({ project, groupBy, expanded, onToggle, laborBudget, memberA
       </span>
       <LaborBudgetBadge budget={laborBudget} />
       <MemberAssignmentBadge assignment={memberAssignment} />
+      <EndDateBadge project={project} />
       <ChevronDownIcon className={`h-3.5 w-3.5 shrink-0 text-slate-300 group-hover:text-slate-500 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} />
     </button>
   );
