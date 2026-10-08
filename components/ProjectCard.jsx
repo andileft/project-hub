@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { collection, getDocs, query, where, db, COLLECTION_PATH } from '../utils/firebase';
 import { getStatusClasses, formatDisplayDate, formatShortCurrency, safeParseFloat } from '../utils/formatting';
 import { parseNoteUpdates } from '../utils/parsers';
+import LaborBudgetBadge from './LaborBudgetBadge';
 import {
   Building2Icon,
   UserCogIcon,
@@ -26,7 +27,7 @@ import {
   Loader2Icon
 } from './Icons';
 
-const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false }) => {
+const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, laborBudget }) => {
   const statusStyle = getStatusClasses(project.status);
   const [showTeam, setShowTeam] = useState(false);
   const [team, setTeam] = useState([]);
@@ -243,6 +244,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false }) =
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter tabular-nums">{project.projNumber || 'NO-ID'}</span>
             <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${statusStyle.badge}`}>{project.status}</span>
             <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400">{project.methodology || 'BAST Only'}</span>
+            <LaborBudgetBadge budget={laborBudget} />
           </div>
           <h3 className="font-bold text-slate-800 dark:text-slate-100 truncate text-lg group-hover:text-indigo-600 transition-colors mb-2">{project.projName}</h3>
           <div className="flex flex-wrap gap-x-4 gap-y-2 items-center">

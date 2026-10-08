@@ -20,3 +20,9 @@ export const firebaseConfig = {
 
 export const TECH_HUB_URL = import.meta.env.VITE_TECH_HUB_URL || 'https://tech-hub-22966312336.asia-southeast2.run.app';
 export const ASSIGNMENT_GEN_URL = import.meta.env.VITE_ASSIGNMENT_GEN_URL || '';
+
+// GL accounts considered "labor" rows in projects/{id}/financials
+export const LABOR_GL_ACCOUNTS = ['6200000000'];
+
+// Remaining labor budget warning threshold in juta (Mio IDR)
+export const LABOR_BUDGET_THRESHOLD = 15;

@@ -2,6 +2,7 @@ import React from 'react';
 import { getStatusClasses, formatShortNumber, safeParseFloat } from '../utils/formatting';
 import { Building2Icon, UserCogIcon, ChevronDownIcon } from './Icons';
 import ProjectCard from './ProjectCard';
+import LaborBudgetBadge from './LaborBudgetBadge';
 import Morph from './Morph';
 
 const GRID_TRANSITION = (rows) => ({
@@ -15,7 +16,7 @@ const GRID_TRANSITION = (rows) => ({
  * `groupBy` controls which of the grouping fields is hidden because the group
  * header already shows it.
  */
-const CompactRow = ({ project, groupBy, expanded, onToggle }) => {
+const CompactRow = ({ project, groupBy, expanded, onToggle, laborBudget }) => {
   const hideCustomer = groupBy === 'customer';
   const hidePm = groupBy === 'pm';
   const mandays = formatShortNumber(safeParseFloat(project.sisaMandays));
@@ -51,6 +52,7 @@ const CompactRow = ({ project, groupBy, expanded, onToggle }) => {
       <span className="w-16 shrink-0 text-right text-[11px] font-bold text-emerald-600 tabular-nums">
         {mandays}
       </span>
+      <LaborBudgetBadge budget={laborBudget} />
       <ChevronDownIcon className={`h-3.5 w-3.5 shrink-0 text-slate-300 group-hover:text-slate-500 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} />
     </button>
   );
@@ -59,7 +61,7 @@ const CompactRow = ({ project, groupBy, expanded, onToggle }) => {
 /**
  * One card shell that morphs between the compact row and the full ProjectCard in place.
  */
-const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onDelete }) => {
+const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onDelete, laborBudget }) => {
   const statusStyle = getStatusClasses(project.status);
 
   return (
@@ -69,7 +71,7 @@ const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onD
           className={`min-h-0 overflow-hidden transition-opacity duration-200 ${expanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           aria-hidden={expanded}
         >
-          <CompactRow project={project} groupBy={groupBy} expanded={expanded} onToggle={onToggle} />
+          <CompactRow project={project} groupBy={groupBy} expanded={expanded} onToggle={onToggle} laborBudget={laborBudget} />
         </div>
       </div>
 
@@ -91,6 +93,7 @@ const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onD
           isAdmin={isAdmin}
           onEdit={onEdit}
           onDelete={onDelete}
+          laborBudget={laborBudget}
         />
       </Morph>
     </div>
