@@ -126,8 +126,9 @@ const App = () => {
   // so it survives the sign-in gate. Consumed exactly once after data loads.
   const deepLinkNumberRef = useRef(readProjParam(typeof window !== 'undefined' ? window.location.search : ''));
   const deepLinkHandledRef = useRef(false);
-  // When set, the list is narrowed to this single project (deep link pin).
-  const [pinnedProjectId, setPinnedProjectId] = useState(null);
+  // Focus mode: when set, chrome (header/filters/toolbar) is hidden and only the
+  // single project's card is shown. Set by deep link; there is no in-app exit.
+  const [focusProjectId, setFocusProjectId] = useState(null);
   // Kept so the "not found" notice is only offered while the pin is absent.
   const deepLinkNoticeShownRef = useRef(false);
 
@@ -176,11 +177,6 @@ const App = () => {
 
   // Filtered projects
   const filteredProjects = useMemo(() => {
-    // Deep-link pin: show only the targeted project, bypassing other filters.
-    if (pinnedProjectId) {
-      const pinned = projects.filter(p => p.id === pinnedProjectId);
-      if (pinned.length > 0) return pinned;
-    }
     return projects.filter(p => {
       // Status filter
       if (filters.status === 'All') {
@@ -221,7 +217,7 @@ const App = () => {
       if (!filters.showArchived && p.status === 'Archived') return false;
       return true;
     });
-  }, [projects, filters, searchTerm, pinnedProjectId]);
+  }, [projects, filters, searchTerm]);
 
   // Remaining labor budget per visible project (cached, lazily fetched)
   const laborBudgets = useLaborBudgets(filteredProjects);
@@ -382,25 +378,8 @@ const App = () => {
       return;
     }
 
-    // Narrow to just this project (pin) and mirror the number in search so the
-    // table stays coherent if the user later drops the pin.
-    setPinnedProjectId(match.id);
-    setSearchTerm(match.projNumber || projNumber.toUpperCase());
-    setExpandedIds(new Set([match.id]));
-    // Ensure the group containing it is not collapsed in the stacked view.
-    setCollapsedGroups(new Set());
-
-    // Scroll into view once the card has mounted/expanded.
-    const scrollTarget = () => {
-      const el = document.getElementById(projectAnchorId(match.id));
-      if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    };
-    const t1 = setTimeout(scrollTarget, 60);
-    const t2 = setTimeout(scrollTarget, 350);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
+    // Focus on just this project: hide all chrome and show only its card.
+    setFocusProjectId(match.id);
   }, [isAuthenticated, loading, projects, showToast]);
 
   // Handlers
@@ -600,7 +579,6 @@ const App = () => {
   }, [showToast]);
 
   const handleProjectClick = useCallback((projectId) => {
-    setPinnedProjectId(null);
     if (projectId === 'Belum SDHO') {
       // View All Belum SDHO
       setActiveTab('list');
@@ -635,7 +613,6 @@ const App = () => {
   }, [projects]);
 
   const handlePMClick = useCallback((pm) => {
-    setPinnedProjectId(null);
     setActiveTab('list');
     setFilters({
       status: 'All Active',
@@ -650,7 +627,6 @@ const App = () => {
   }, [dashboardYear]);
 
   const handleCustomerClick = useCallback((customer) => {
-    setPinnedProjectId(null);
     setActiveTab('list');
     setFilters({
       status: 'All',
@@ -665,18 +641,14 @@ const App = () => {
   }, [dashboardYear]);
 
   const handleFilterChange = useCallback((key, value) => {
-    // A user changing filters takes precedence over the deep-link pin.
-    setPinnedProjectId(null);
     setFilters(prev => ({ ...prev, [key]: value }));
   }, []);
 
   const handleSearchChange = useCallback((value) => {
-    setPinnedProjectId(null);
     setSearchTerm(value);
   }, []);
 
   const resetFilters = useCallback(() => {
-    setPinnedProjectId(null);
     setFilters({
       status: 'All Active',
       customer: '',
@@ -777,6 +749,48 @@ const App = () => {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
         <LoginForm onLogin={handleLoginSubmit} isLoggingIn={isLoggingIn} />
+      </div>
+    );
+  }
+
+  // Focus mode: a deep link resolved to one project. Render only that project's
+  // card - no header, filters, list toolbar, or back button.
+  const focusProject = focusProjectId ? projects.find(p => p.id === focusProjectId) : null;
+  if (focusProject) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <main className="max-w-7xl mx-auto px-4 py-6">
+          <div id={projectAnchorId(focusProject.id)} className="scroll-mt-24">
+            <ProjectCard
+              project={focusProject}
+              onEdit={handleOpenModal}
+              onDelete={handleDelete}
+              isAdmin={isAdmin}
+              laborBudget={laborBudgets[focusProject.id]}
+              memberAssignment={memberAssignments[focusProject.id]}
+            />
+          </div>
+        </main>
+
+        {modalOpen && (
+          <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading modal...</div></div>}>
+            <ProjectModal
+              isOpen={modalOpen}
+              editingProject={editingProject}
+              formData={formData}
+              isAdmin={isAdmin}
+              formError={null}
+              onClose={handleCloseModal}
+              onSubmit={handleSubmit}
+              onFormDataChange={handleFormDataChange}
+              onAttachmentUpload={handleAttachmentUpload}
+              onAttachmentDelete={handleAttachmentDelete}
+              showToast={showToast}
+            />
+          </Suspense>
+        )}
+
+        {toast && <Toast toast={toast} onClear={() => setToast(null)} />}
       </div>
     );
   }
