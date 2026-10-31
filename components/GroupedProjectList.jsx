@@ -131,18 +131,19 @@ const GroupedProjectList = ({
             <Morph open={!collapsed}>
               <div className="flex flex-col gap-1 pb-1">
                 {group.projects.map((p) => (
-                  <ProjectRow
-                    key={p.id}
-                    project={p}
-                    groupBy={groupBy}
-                    expanded={expandedIds.has(p.id)}
-                    onToggle={() => onToggleCard(p.id)}
-                    isAdmin={isAdmin}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    laborBudget={laborBudgets?.[p.id]}
-                    memberAssignment={memberAssignments?.[p.id]}
-                  />
+                  <div key={p.id} id={`deeplink-target-${p.id}`} className="scroll-mt-24">
+                    <ProjectRow
+                      project={p}
+                      groupBy={groupBy}
+                      expanded={expandedIds.has(p.id)}
+                      onToggle={() => onToggleCard(p.id)}
+                      isAdmin={isAdmin}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      laborBudget={laborBudgets?.[p.id]}
+                      memberAssignment={memberAssignments?.[p.id]}
+                    />
+                  </div>
                 ))}
               </div>
             </Morph>

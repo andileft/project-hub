@@ -32,6 +32,10 @@ import { useLaborBudgets } from '../hooks/useLaborBudgets';
 import { useMemberAssignments } from '../hooks/useMemberAssignments';
 import { parseCSVFile } from '../utils/parsers';
  import { extractTextFromFile, uploadFileToStorage, deleteFileFromStorageByUrl } from './utils/file-utils.js';
+import { readProjParam, findProjectByProjNumber } from './utils/deeplink.js';
+
+// Stable DOM id for the row/card a deep link scrolls to.
+export const projectAnchorId = (projectId) => `deeplink-target-${projectId}`;
 
 const Dashboard = lazy(() => import('../components/Dashboard'));
 const ProjectModal = lazy(() => import('../components/ProjectModal'));
@@ -118,6 +122,15 @@ const App = () => {
   });
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Deep link (?proj=<PROJNUMBER>): read once per page load and held in memory
+  // so it survives the sign-in gate. Consumed exactly once after data loads.
+  const deepLinkNumberRef = useRef(readProjParam(typeof window !== 'undefined' ? window.location.search : ''));
+  const deepLinkHandledRef = useRef(false);
+  // When set, the list is narrowed to this single project (deep link pin).
+  const [pinnedProjectId, setPinnedProjectId] = useState(null);
+  // Kept so the "not found" notice is only offered while the pin is absent.
+  const deepLinkNoticeShownRef = useRef(false);
+
   // List view mode: 'new' = stacked + grouped, 'classic' = today's full cards
   const [viewMode, setViewMode] = useState(() => readStored(VIEW_MODE_KEY, 'new', VIEW_MODES));
   const [groupBy, setGroupBy] = useState(() => readStored(GROUP_BY_KEY, 'status', GROUP_BYS));
@@ -163,6 +176,11 @@ const App = () => {
 
   // Filtered projects
   const filteredProjects = useMemo(() => {
+    // Deep-link pin: show only the targeted project, bypassing other filters.
+    if (pinnedProjectId) {
+      const pinned = projects.filter(p => p.id === pinnedProjectId);
+      if (pinned.length > 0) return pinned;
+    }
     return projects.filter(p => {
       // Status filter
       if (filters.status === 'All') {
@@ -203,7 +221,7 @@ const App = () => {
       if (!filters.showArchived && p.status === 'Archived') return false;
       return true;
     });
-  }, [projects, filters, searchTerm]);
+  }, [projects, filters, searchTerm, pinnedProjectId]);
 
   // Remaining labor budget per visible project (cached, lazily fetched)
   const laborBudgets = useLaborBudgets(filteredProjects);
@@ -341,6 +359,49 @@ const App = () => {
     setExpandedIds(new Set());
     setCollapsedGroups(new Set());
   }, [groupBy]);
+
+  // Deep link execution: runs once per page load, after login AND data are ready.
+  useEffect(() => {
+    const projNumber = deepLinkNumberRef.current;
+    if (!projNumber) return;
+    if (deepLinkHandledRef.current) return;
+    if (!isAuthenticated || loading) return;
+
+    deepLinkHandledRef.current = true;
+
+    // Always land on the list tab.
+    setActiveTab('list');
+
+    const match = findProjectByProjNumber(projects, projNumber);
+    if (!match) {
+      // Not found: untouched normal list + a single visible notice.
+      if (!deepLinkNoticeShownRef.current) {
+        deepLinkNoticeShownRef.current = true;
+        showToast('info', `Project ${projNumber.toUpperCase()} not found in Hub. Showing all projects.`, 8000);
+      }
+      return;
+    }
+
+    // Narrow to just this project (pin) and mirror the number in search so the
+    // table stays coherent if the user later drops the pin.
+    setPinnedProjectId(match.id);
+    setSearchTerm(match.projNumber || projNumber.toUpperCase());
+    setExpandedIds(new Set([match.id]));
+    // Ensure the group containing it is not collapsed in the stacked view.
+    setCollapsedGroups(new Set());
+
+    // Scroll into view once the card has mounted/expanded.
+    const scrollTarget = () => {
+      const el = document.getElementById(projectAnchorId(match.id));
+      if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+    const t1 = setTimeout(scrollTarget, 60);
+    const t2 = setTimeout(scrollTarget, 350);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [isAuthenticated, loading, projects, showToast]);
 
   // Handlers
   const toggleTheme = useCallback(() => {
@@ -539,6 +600,7 @@ const App = () => {
   }, [showToast]);
 
   const handleProjectClick = useCallback((projectId) => {
+    setPinnedProjectId(null);
     if (projectId === 'Belum SDHO') {
       // View All Belum SDHO
       setActiveTab('list');
@@ -573,6 +635,7 @@ const App = () => {
   }, [projects]);
 
   const handlePMClick = useCallback((pm) => {
+    setPinnedProjectId(null);
     setActiveTab('list');
     setFilters({
       status: 'All Active',
@@ -587,6 +650,7 @@ const App = () => {
   }, [dashboardYear]);
 
   const handleCustomerClick = useCallback((customer) => {
+    setPinnedProjectId(null);
     setActiveTab('list');
     setFilters({
       status: 'All',
@@ -601,10 +665,18 @@ const App = () => {
   }, [dashboardYear]);
 
   const handleFilterChange = useCallback((key, value) => {
+    // A user changing filters takes precedence over the deep-link pin.
+    setPinnedProjectId(null);
     setFilters(prev => ({ ...prev, [key]: value }));
   }, []);
 
+  const handleSearchChange = useCallback((value) => {
+    setPinnedProjectId(null);
+    setSearchTerm(value);
+  }, []);
+
   const resetFilters = useCallback(() => {
+    setPinnedProjectId(null);
     setFilters({
       status: 'All Active',
       customer: '',
@@ -734,7 +806,7 @@ const App = () => {
               searchTerm={searchTerm}
               filterOptions={filterOptions}
               pmOptions={pmOptions}
-              onSearchChange={setSearchTerm}
+              onSearchChange={handleSearchChange}
               onFilterChange={handleFilterChange}
               onReset={resetFilters}
             />
@@ -757,7 +829,9 @@ const App = () => {
             ) : viewMode === 'classic' ? (
               <div className="flex flex-col gap-6">
                 {filteredProjects.map(project => (
-                  <ProjectCard key={project.id} project={project} onEdit={handleOpenModal} onDelete={handleDelete} isAdmin={isAdmin} laborBudget={laborBudgets[project.id]} memberAssignment={memberAssignments[project.id]} />
+                  <div key={project.id} id={projectAnchorId(project.id)} className="scroll-mt-24">
+                    <ProjectCard project={project} onEdit={handleOpenModal} onDelete={handleDelete} isAdmin={isAdmin} laborBudget={laborBudgets[project.id]} memberAssignment={memberAssignments[project.id]} />
+                  </div>
                 ))}
               </div>
             ) : (
