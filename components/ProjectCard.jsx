@@ -68,13 +68,20 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
         console.error("Error fetching letters status:", le);
       }
 
-      // Sort team members: Project Manager first
+      // Sort team members: Project Manager first, then by WBS, then by name
       const sortedTeam = teamData.sort((a, b) => {
         const roleA = (a.role || '').toLowerCase();
         const roleB = (b.role || '').toLowerCase();
-        if (roleA === 'project manager' && roleB !== 'project manager') return -1;
-        if (roleA !== 'project manager' && roleB === 'project manager') return 1;
-        return 0;
+        const pmA = roleA === 'project manager';
+        const pmB = roleB === 'project manager';
+        if (pmA !== pmB) return pmA ? -1 : 1;
+
+        const wbsA = a.wbs || a.fullWbs || '';
+        const wbsB = b.wbs || b.fullWbs || '';
+        const wbsCmp = wbsA.localeCompare(wbsB, undefined, { numeric: true, sensitivity: 'base' });
+        if (wbsCmp !== 0) return wbsCmp;
+
+        return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
       });
       setTeam(sortedTeam);
       setShowTeam(true);
@@ -226,7 +233,17 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
         return acc;
       }, {});
 
-      setFinancials(Object.values(grouped));
+      // Sort: WBS groups, then each group's details by GL account
+      const sortedGroups = Object.values(grouped).sort((a, b) =>
+        a.wbs.localeCompare(b.wbs, undefined, { numeric: true, sensitivity: 'base' })
+      );
+      sortedGroups.forEach(group => {
+        group.items.sort((a, b) =>
+          String(a.glAccount || '').localeCompare(String(b.glAccount || ''), undefined, { numeric: true, sensitivity: 'base' })
+        );
+      });
+
+      setFinancials(sortedGroups);
       setShowFinancials(true);
     } catch (error) {
       console.error("Error fetching financials:", error);
