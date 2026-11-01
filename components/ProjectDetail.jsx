@@ -257,8 +257,12 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
   };
 
   // Open a cited source file: resolve a short-lived signed URL then open it.
+  // Tech Hub matches on the logical source-file id (`structData.docId`), which
+  // the citation exposes as `filter_doc_id`; `doc_id` is the chunk document id.
+  const sourceDocId = (c) => c?.filter_doc_id || c?.metadata?.docId || c?.doc_id || '';
+
   const handleOpenSource = async (cit) => {
-    const docId = cit?.doc_id;
+    const docId = sourceDocId(cit);
     if (!docId || openingDocId) return;
 
     // Reuse a URL requested in the last 10 minutes (signed URLs live 15 min).
@@ -636,8 +640,9 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
                         {m.citations?.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-2.5 pt-2.5 border-t border-[var(--line)]">
                             <span className="text-[.62rem] font-extrabold uppercase tracking-wider text-muted2 self-center mr-0.5">Sources</span>                            {m.citations.map((c, ci) => {
-                              const canOpen = !!c.doc_id;
-                              const busy = openingDocId === c.doc_id;
+                              const id = sourceDocId(c);
+                              const canOpen = !!id;
+                              const busy = !!id && openingDocId === id;
                               const title = [c.citation || c.filename, canOpen ? 'Klik untuk membuka file' : 'File sumber tidak tersedia'].filter(Boolean).join(' — ');
                               return canOpen ? (
                                 <button
