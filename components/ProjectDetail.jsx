@@ -95,7 +95,7 @@ const TAB_LABELS = [
  * Reuses the app's existing data sources (projects/{id}/financials, /team,
  * assignmentLetters) and postMessage/external actions. No new data fields.
  */
-const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget, memberAssignment }) => {
+const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget, memberAssignment, showExtActions = true }) => {
   const [tab, setTab] = useState('fin');
 
   const [showTeam, setShowTeam] = useState(false);
@@ -443,7 +443,9 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
                 {loadingFinancials && <div className="py-10 text-center text-muted"><Loader2Icon className="h-5 w-5 animate-spin inline" /></div>}
                 {isAdmin && (
                   <div className="flex justify-end gap-2 px-5 py-3.5 border-t border-[var(--line)]">
-                    <button onClick={() => post('GO_TO_FINANCIALS_SCRAPE')} className="ph-btn ph-btn--outline ph-btn--sm hidden lg:inline-flex"><DatabaseIcon className="h-4 w-4" />Scrape Financials</button>
+                    {showExtActions && (
+                      <button onClick={() => post('GO_TO_FINANCIALS_SCRAPE')} className="ph-btn ph-btn--outline ph-btn--sm"><DatabaseIcon className="h-4 w-4" />Scrape Financials</button>
+                    )}
                     <button onClick={goPerformance} className="ph-btn ph-btn--outline ph-btn--sm"><BarChart3Icon className="h-4 w-4" />Performance</button>
                   </div>
                 )}
@@ -505,9 +507,9 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
                   </table>
                 </div>
                 {team.length === 0 && !loadingTeam && <div className="py-10 text-center text-muted">No team members assigned.</div>}
-                {isAdmin && (
+                {isAdmin && showExtActions && (
                   <div className="flex justify-end px-4 py-3.5 border-t border-[var(--line)]">
-                    <button onClick={() => post('GO_TO_TEAM_SCRAPE')} className="ph-btn ph-btn--outline ph-btn--sm hidden lg:inline-flex"><DatabaseIcon className="h-4 w-4" />Scrape Team Assignment</button>
+                    <button onClick={() => post('GO_TO_TEAM_SCRAPE')} className="ph-btn ph-btn--outline ph-btn--sm"><DatabaseIcon className="h-4 w-4" />Scrape Team Assignment</button>
                   </div>
                 )}
               </section>

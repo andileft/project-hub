@@ -40,6 +40,7 @@ const ProjectTable = ({
   laborBudgets,
   memberAssignments,
   onOpenDetail,
+  showExtActions,
   sortKey = 'projNumber',
   sortDir = 'asc',
   onSortChange
@@ -249,6 +250,7 @@ const ProjectTable = ({
                 onDelete={onDelete}
                 laborBudget={laborBudgets?.[openProject.id]}
                 memberAssignment={memberAssignments?.[openProject.id]}
+                showExtActions={showExtActions}
               />
             </div>
           </aside>

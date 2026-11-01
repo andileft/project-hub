@@ -90,7 +90,7 @@ const Panel = ({ icon, title, hint, children }) => (
   </section>
 );
 
-const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, laborBudget, memberAssignment, onOpenDetail }) => {
+const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, laborBudget, memberAssignment, onOpenDetail, showExtActions = true }) => {
   const statusClass = getStatusChipClass(project.status);
 
   // Team (collapsed by default, loaded on first open)
@@ -420,10 +420,14 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
             hint={<span className="text-[.72rem] text-muted2">related systems</span>}
           >
             <div className="flex flex-wrap gap-2">
-              <button onClick={handleGoToCpc} className="ph-btn ph-btn--ghost ph-btn--sm hidden lg:inline-flex">CPC Quote ↗</button>
-              <button onClick={handleGoToSimplify} className="ph-btn ph-btn--ghost ph-btn--sm hidden lg:inline-flex">Simplify ↗</button>
-              <button onClick={handleGoToIserve} className="ph-btn ph-btn--ghost ph-btn--sm hidden lg:inline-flex">iServe ↗</button>
-              <button onClick={handleGoToFinancials} className="ph-btn ph-btn--ghost ph-btn--sm hidden lg:inline-flex">Financials ↗</button>
+              {showExtActions && (
+                <>
+                  <button onClick={handleGoToCpc} className="ph-btn ph-btn--ghost ph-btn--sm">CPC Quote ↗</button>
+                  <button onClick={handleGoToSimplify} className="ph-btn ph-btn--ghost ph-btn--sm">Simplify ↗</button>
+                  <button onClick={handleGoToIserve} className="ph-btn ph-btn--ghost ph-btn--sm">iServe ↗</button>
+                  <button onClick={handleGoToFinancials} className="ph-btn ph-btn--ghost ph-btn--sm">Financials ↗</button>
+                </>
+              )}
               <button onClick={handleGoToTechHub} className="ph-btn ph-btn--ghost ph-btn--sm">Tech Hub ↗</button>
               <button onClick={handleViewPerformance} className="ph-btn ph-btn--ghost ph-btn--sm">Performance ↗</button>
             </div>
@@ -494,16 +498,23 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
             <div className="grid transition-[grid-template-rows] duration-300 ease-out" style={{ gridTemplateRows: finOpen ? '1fr' : '0fr' }}>
               <div className="min-h-0 overflow-hidden">
                 <div className="border-t border-[var(--line)] px-4 pt-4 pb-3">
-                  {isAdmin && (
+                  {isAdmin && showExtActions && (
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                       {lastUpdatedFinancials ? (
                         <span className={`ph-chip ${(new Date() - lastUpdatedFinancials) / (1000 * 60 * 60 * 24) > 7 ? 'ph-chip--amber' : 'ph-chip--green'}`}>
                           Updated: {formatDisplayDate(lastUpdatedFinancials)}
                         </span>
                       ) : <span />}
-                      <button onClick={handleScrapeFinancials} className="ph-btn ph-btn--outline ph-btn--sm hidden lg:inline-flex" title="Scrape Financials from CPC">
+                      <button onClick={handleScrapeFinancials} className="ph-btn ph-btn--outline ph-btn--sm" title="Scrape Financials from CPC">
                         <DatabaseIcon className="h-3.5 w-3.5" />Scrape
                       </button>
+                    </div>
+                  )}
+                  {isAdmin && !showExtActions && lastUpdatedFinancials && (
+                    <div className="mb-3">
+                      <span className={`ph-chip ${(new Date() - lastUpdatedFinancials) / (1000 * 60 * 60 * 24) > 7 ? 'ph-chip--amber' : 'ph-chip--green'}`}>
+                        Updated: {formatDisplayDate(lastUpdatedFinancials)}
+                      </span>
                     </div>
                   )}
                   {financials.length > 0 ? (
@@ -584,9 +595,9 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
             <div className="grid transition-[grid-template-rows] duration-300 ease-out" style={{ gridTemplateRows: teamOpen ? '1fr' : '0fr' }}>
               <div className="min-h-0 overflow-hidden">
                 <div className="border-t border-[var(--line)] px-4 pt-4 pb-3">
-                  {isAdmin && (
+                  {isAdmin && showExtActions && (
                     <div className="flex justify-end mb-3">
-                      <button onClick={handleScrapeTeam} className="ph-btn ph-btn--outline ph-btn--sm hidden lg:inline-flex" title="Scrape Team from CPC">
+                      <button onClick={handleScrapeTeam} className="ph-btn ph-btn--outline ph-btn--sm" title="Scrape Team from CPC">
                         <DatabaseIcon className="h-3.5 w-3.5" />Scrape Team
                       </button>
                     </div>

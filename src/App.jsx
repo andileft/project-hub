@@ -175,6 +175,14 @@ const App = () => {
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
   );
 
+  // The CPC/Simplify/iServe/scrape buttons rely on the desktop browser
+  // extension. Phones and tablets (iPad/Android) have no extension, so we key
+  // off the primary pointer: mouse/trackpad = yes, touch = no. This is correct
+  // regardless of device width or orientation.
+  const [canUseExtension, setCanUseExtension] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  );
+
   // Table view sort state (lifted so it survives view switches).
   const [tableSortKey, setTableSortKey] = useState(() => readStored(TABLE_SORT_KEY, 'projNumber', TABLE_SORT_KEYS));
   const [tableSortDir, setTableSortDir] = useState(() => readStored(TABLE_SORT_DIR_KEY, 'asc', TABLE_SORT_DIRS));
@@ -389,6 +397,15 @@ const App = () => {
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
     const onChange = () => setIsPhone(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  // Track whether a real pointer (mouse/trackpad) is available.
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const onChange = () => setCanUseExtension(mq.matches);
     onChange();
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
@@ -850,6 +867,7 @@ const App = () => {
     return (
       <div>
         <ProjectDetail
+          showExtActions={canUseExtension}
           project={focusProject}
           onEdit={handleOpenModal}
           onDelete={handleDelete}
@@ -932,6 +950,7 @@ const App = () => {
               </div>
             ) : (viewMode === 'table' && !isPhone) ? (
               <ProjectTable
+                showExtActions={canUseExtension}
                 projects={filteredProjects}
                 isAdmin={isAdmin}
                 onEdit={handleOpenModal}
@@ -945,6 +964,7 @@ const App = () => {
               />
             ) : (
               <GroupedProjectList
+                showExtActions={canUseExtension}
                 projects={filteredProjects}
                 groupBy={groupBy}
                 expandedIds={expandedIds}

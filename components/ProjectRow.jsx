@@ -81,7 +81,7 @@ const CompactRow = ({ project, groupBy, expanded, onToggle, laborBudget, memberA
 /**
  * One card shell that morphs between the compact row and the full ProjectCard in place.
  */
-const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onDelete, laborBudget, memberAssignment, onOpenDetail, flush = false }) => {
+const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onDelete, laborBudget, memberAssignment, onOpenDetail, showExtActions, flush = false }) => {
   return (
     <div className={flush
       ? `transition-colors duration-200 ${expanded ? 'bg-[var(--surface-2)]' : ''}`
@@ -116,6 +116,7 @@ const ProjectRow = ({ project, groupBy, expanded, onToggle, isAdmin, onEdit, onD
           laborBudget={laborBudget}
           memberAssignment={memberAssignment}
           onOpenDetail={onOpenDetail}
+          showExtActions={showExtActions}
         />
       </Morph>
     </div>

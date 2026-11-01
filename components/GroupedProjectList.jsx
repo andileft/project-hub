@@ -118,7 +118,8 @@ const GroupedProjectList = ({
   onDelete,
   laborBudgets,
   memberAssignments,
-  onOpenDetail
+  onOpenDetail,
+  showExtActions
 }) => {
   const groups = useMemo(() => buildGroups(projects, groupBy), [projects, groupBy]);
   const showHeaders = groupBy && groupBy !== 'none';
@@ -196,6 +197,7 @@ const GroupedProjectList = ({
                       laborBudget={laborBudgets?.[p.id]}
                       memberAssignment={memberAssignments?.[p.id]}
                       onOpenDetail={onOpenDetail}
+                      showExtActions={showExtActions}
                       flush
                     />
                   </div>
