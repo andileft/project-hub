@@ -85,7 +85,7 @@ Capabilities & Instructions:
               }`}
               style={m.role === 'user' ? { background: 'linear-gradient(135deg, var(--wine), var(--wine-2))' } : undefined}
             >
-              {m.role === 'assistant' ? <span dangerouslySetInnerHTML={{ __html: formatAssistantMessageHtml(m.text) }} /> : m.text}
+              {m.role === 'assistant' ? <span className="ph-md" dangerouslySetInnerHTML={{ __html: formatAssistantMessageHtml(m.text) }} /> : m.text}
             </div>
           </div>
         ))}

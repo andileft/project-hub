@@ -178,15 +178,96 @@ export function escapeHtml(s) {
 }
 
 /**
- * Converts a raw assistant message to safe HTML with basic markdown-like formatting.
- * Supports **bold**, *italic*, and line breaks.
+ * Inline markdown (already-escaped input): `**bold**`, `*italic*`, `` `code` ``.
+ */
+function formatInline(text) {
+  return text
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+    .replace(/(^|[^*])\*([^*]+?)\*/g, '$1<i>$2</i>');
+}
+
+const isTableSeparator = (line) =>
+  /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(line);
+
+const splitRow = (line) =>
+  line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map((c) => c.trim());
+
+/**
+ * Converts a raw assistant message to safe HTML. Handles the markdown the
+ * assistant actually emits: **bold**, *italic*, `code`, fenced code blocks,
+ * # headings, - / 1. lists, GitHub-style pipe tables, and line breaks.
  * @param {string} raw - The raw message text
  * @returns {string} HTML-formatted message
  */
 export function formatAssistantMessageHtml(raw) {
-  const e = escapeHtml(raw);
-  return e
-    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
-    .replace(/\*(.+?)\*/g, '<i>$1</i>')
+  const lines = escapeHtml(raw).split('\n');
+  const out = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Fenced code block
+    if (/^\s*```/.test(line)) {
+      const buf = [];
+      i++;
+      while (i < lines.length && !/^\s*```/.test(lines[i])) { buf.push(lines[i]); i++; }
+      i++; // skip closing fence
+      out.push(`<pre><code>${buf.join('\n')}</code></pre>`);
+      continue;
+    }
+
+    // Pipe table: header row + separator row
+    if (line.includes('|') && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+      const header = splitRow(line);
+      i += 2;
+      const rows = [];
+      while (i < lines.length && lines[i].includes('|') && lines[i].trim() !== '') {
+        rows.push(splitRow(lines[i]));
+        i++;
+      }
+      const head = header.map((c) => `<th>${formatInline(c)}</th>`).join('');
+      const body = rows
+        .map((r) => `<tr>${r.map((c) => `<td>${formatInline(c)}</td>`).join('')}</tr>`)
+        .join('');
+      out.push(`<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`);
+      continue;
+    }
+
+    // Heading
+    const h = line.match(/^\s*(#{1,6})\s+(.*)$/);
+    if (h) {
+      const level = Math.min(h[1].length + 2, 6);
+      out.push(`<h${level}>${formatInline(h[2])}</h${level}>`);
+      i++;
+      continue;
+    }
+
+    // Unordered / ordered list (consecutive items)
+    if (/^\s*([-*+]|\d+\.)\s+/.test(line)) {
+      const ordered = /^\s*\d+\.\s+/.test(line);
+      const items = [];
+      while (i < lines.length && /^\s*([-*+]|\d+\.)\s+/.test(lines[i])) {
+        items.push(`<li>${formatInline(lines[i].replace(/^\s*([-*+]|\d+\.)\s+/, ''))}</li>`);
+        i++;
+      }
+      out.push(ordered ? `<ol>${items.join('')}</ol>` : `<ul>${items.join('')}</ul>`);
+      continue;
+    }
+
+    // Blank line
+    if (line.trim() === '') { out.push(''); i++; continue; }
+
+    // Regular paragraph line
+    out.push(formatInline(line));
+    i++;
+  }
+
+  // Join: keep table/list/pre blocks as-is, turn remaining newlines into <br/>.
+  return out
+    .join('\n')
+    .replace(/\n(?=<(table|ul|ol|pre|h[1-6]))/g, '')
+    .replace(/(<\/(table|ul|ol|pre|h[1-6])>)\n/g, '$1')
     .replace(/\n/g, '<br/>');
 }

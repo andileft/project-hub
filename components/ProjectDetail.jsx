@@ -601,7 +601,7 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
                         style={m.role === 'user' ? { background: 'linear-gradient(135deg, var(--wine), var(--wine-2))' } : undefined}
                       >
                         {m.role === 'assistant' && !m.error
-                          ? <span dangerouslySetInnerHTML={{ __html: formatAssistantMessageHtml(m.text) }} />
+                          ? <span className="ph-md" dangerouslySetInnerHTML={{ __html: formatAssistantMessageHtml(m.text) }} />
                           : m.text}
                         {m.citations?.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-2.5 pt-2.5 border-t border-[var(--line)]">
