@@ -8,7 +8,7 @@ import {
 } from '../utils/formatting';
 import { parseNoteUpdates } from '../utils/parsers';
 import { TECH_HUB_URL } from '../constants/config';
-import { askTechHubChat } from '../utils/techHubChat';
+import { askTechHubChat, getTechHubFileUrl } from '../utils/techHubChat';
 import {
   laborSeverity,
   assignmentSeverity,
@@ -110,7 +110,9 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [chatThinking, setChatThinking] = useState(false);
+  const [openingDocId, setOpeningDocId] = useState(null);
   const chatRef = React.useRef(null);
+  const signedUrlCache = React.useRef(new Map());
 
   // ---- Data fetch (same sources as ProjectCard) ----
   useEffect(() => {
@@ -251,6 +253,34 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
       }]);
     } finally {
       setChatThinking(false);
+    }
+  };
+
+  // Open a cited source file: resolve a short-lived signed URL then open it.
+  const handleOpenSource = async (cit) => {
+    const docId = cit?.doc_id;
+    if (!docId || openingDocId) return;
+
+    // Reuse a URL requested in the last 10 minutes (signed URLs live 15 min).
+    const cached = signedUrlCache.current.get(docId);
+    if (cached && cached.exp > Date.now()) {
+      window.open(cached.url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    setOpeningDocId(docId);
+    try {
+      const { url } = await getTechHubFileUrl({ projNumber: project.projNumber, docId });
+      signedUrlCache.current.set(docId, { url, exp: Date.now() + 10 * 60 * 1000 });
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      setChatMessages((prev) => [...prev, {
+        role: 'assistant',
+        text: err?.message || 'Gagal membuka file sumber.',
+        error: true,
+      }]);
+    } finally {
+      setOpeningDocId(null);
     }
   };
 
@@ -605,13 +635,29 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
                           : m.text}
                         {m.citations?.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-2.5 pt-2.5 border-t border-[var(--line)]">
-                            <span className="text-[.62rem] font-extrabold uppercase tracking-wider text-muted2 self-center mr-0.5">Sources</span>
-                            {m.citations.map((c, ci) => (
-                              <span key={ci} className="ph-chip ph-chip--ghost text-[.64rem]" title={c.filename || c.citation || ''}>
-                                <FileTextIcon className="h-3 w-3" />
-                                {c.filename || c.citation || `Source ${ci + 1}`}
-                              </span>
-                            ))}
+                            <span className="text-[.62rem] font-extrabold uppercase tracking-wider text-muted2 self-center mr-0.5">Sources</span>                            {m.citations.map((c, ci) => {
+                              const canOpen = !!c.doc_id;
+                              const busy = openingDocId === c.doc_id;
+                              const title = [c.citation || c.filename, canOpen ? 'Klik untuk membuka file' : 'File sumber tidak tersedia'].filter(Boolean).join(' — ');
+                              return canOpen ? (
+                                <button
+                                  key={ci}
+                                  type="button"
+                                  onClick={() => handleOpenSource(c)}
+                                  disabled={busy}
+                                  title={title}
+                                  className="ph-chip ph-chip--wine text-[.64rem] hover:brightness-95 disabled:opacity-60 cursor-pointer"
+                                >
+                                  {busy ? <Loader2Icon className="h-3 w-3 animate-spin" /> : <FileTextIcon className="h-3 w-3" />}
+                                  {c.filename || c.citation || `Source ${ci + 1}`}
+                                </button>
+                              ) : (
+                                <span key={ci} className="ph-chip ph-chip--ghost text-[.64rem]" title={title}>
+                                  <FileTextIcon className="h-3 w-3" />
+                                  {c.filename || c.citation || `Source ${ci + 1}`}
+                                </span>
+                              );
+                            })}
                           </div>
                         )}
                       </div>

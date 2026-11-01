@@ -84,3 +84,52 @@ export async function askTechHubChat({ projNumber, query, messages = [] }) {
     usage: data.usage ?? null,
   };
 }
+
+/**
+ * Resolve a short-lived signed URL for a cited source document.
+ * Tech Hub resolves the storage path server-side from the doc id (the caller
+ * never sends a raw path) and enforces per-project access.
+ *
+ * @param {object} args
+ * @param {string} args.projNumber  Project number (Tech Hub `projectId`).
+ * @param {string} args.docId       Citation `doc_id`.
+ * @returns {Promise<{url: string, filename: string}>}
+ */
+export async function getTechHubFileUrl({ projNumber, docId }) {
+  if (!projNumber) throw new TechHubChatError('Nomor proyek tidak tersedia.', 400);
+  if (!docId) throw new TechHubChatError('Dokumen sumber tidak tersedia.', 400);
+
+  const user = auth.currentUser;
+  if (!user) throw new TechHubChatError('Belum login.', 401);
+
+  const token = await user.getIdToken();
+
+  let res;
+  try {
+    res = await fetch(`${TECH_HUB_API_URL}/api/tkb`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        action: 'sign-doc-url',
+        projectId: projNumber,
+        metadata: { docId },
+      }),
+    });
+  } catch {
+    throw new TechHubChatError('Tidak bisa menghubungi Tech Hub. Periksa koneksi.', 0);
+  }
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const msg = data?.error || '';
+    if (res.status === 404) throw new TechHubChatError(msg || 'File sumber sudah tidak tersedia.', 404);
+    throw new TechHubChatError(errorMessageFor(res.status, msg), res.status);
+  }
+
+  const data = await res.json();
+  if (!data?.url) throw new TechHubChatError('File sumber sudah tidak tersedia.', 404);
+  return { url: data.url, filename: data.filename || '' };
+}
