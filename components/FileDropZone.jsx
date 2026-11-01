@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2Icon, Loader2Icon, CheckCircle2Icon } from './Icons';
+import { Trash2Icon, Loader2Icon, CheckCircle2Icon, UploadIcon } from './Icons';
 
 const FileDropZone = ({ label, fileUrl, onUpload, onDelete }) => {
     const [isDragging, setIsDragging] = useState(false);
@@ -34,48 +34,47 @@ const FileDropZone = ({ label, fileUrl, onUpload, onDelete }) => {
         setIsUploading(false);
     };
 
+    const filled = !!fileUrl;
+
     return (
         <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`relative rounded-xl border-2 border-dashed transition-all p-3 flex flex-col justify-between h-24 group ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-indigo-300'
+            className={`relative flex flex-col items-center gap-2 text-center p-4 rounded-2xl border-[1.5px] transition-all group ${isDragging
+                ? 'border-wine-2 bg-[var(--wine-soft)] -translate-y-0.5'
+                : filled
+                    ? 'border-solid border-[var(--green)] bg-[var(--green-soft)]'
+                    : 'border-dashed border-[var(--line-2)] bg-[var(--surface-2)] hover:border-wine-2 hover:bg-[var(--wine-soft)]'
                 }`}
         >
-            <div className="flex justify-between items-start">
-                <p className="text-[10px] font-black text-slate-400 uppercase">{label}</p>
+            <div className="flex w-full justify-between items-start">
+                <span className="text-[.7rem] font-extrabold uppercase tracking-[.06em] text-wine">{label}</span>
                 {fileUrl && onDelete && (
-                    <button type="button" onClick={onDelete} className="text-red-400 hover:text-red-600 p-1 bg-white dark:bg-slate-800 rounded-md shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Trash2Icon className="h-2.5 w-2.5" />
+                    <button type="button" onClick={onDelete} className="text-red-400 hover:text-red-600 p-1 rounded-md transition-colors" aria-label={`Remove ${label}`}>
+                        <Trash2Icon className="h-3 w-3" />
                     </button>
                 )}
             </div>
 
             {isUploading ? (
-                <div className="flex items-center gap-2 text-indigo-600 text-[10px] font-bold">
-                    <Loader2Icon className="h-3 w-3 animate-spin" />
-                    Uploading...
-                </div>
-            ) : fileUrl ? (
-                <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-2 py-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-800 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors truncate">
-                    <CheckCircle2Icon className="h-3 w-3 text-emerald-500" />
-                    <span className="truncate">View File</span>
+                <span className="flex items-center gap-2 text-wine text-[.72rem] font-bold py-2">
+                    <Loader2Icon className="h-4 w-4 animate-spin" />
+                    Uploading…
+                </span>
+            ) : filled ? (
+                <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[.72rem] font-bold text-[var(--green)] hover:opacity-80 transition-opacity py-2">
+                    <CheckCircle2Icon className="h-4 w-4" />
+                    View File
                 </a>
             ) : onUpload ? (
-                <label className="cursor-pointer flex items-center gap-2 px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg text-[10px] font-bold hover:bg-indigo-200 transition-colors self-start">
-                    <span>Choose File</span>
+                <label className="cursor-pointer flex items-center gap-2 text-[.72rem] font-bold text-muted hover:text-wine transition-colors py-2">
+                    <UploadIcon className="h-4 w-4" />
+                    Choose or drop file
                     <input type="file" className="hidden" onChange={handleFileSelect} />
                 </label>
             ) : (
-                <div className="text-[10px] font-bold text-slate-300 italic self-start py-1.5 px-3">
-                    No Attachment
-                </div>
-            )}
-
-            {!fileUrl && !isUploading && (
-                <div className="absolute inset-0 flex items-center justify-end pointer-events-none pr-3 opacity-30 text-[9px] font-bold text-slate-400">
-                    {isDragging ? 'Drop it!' : 'Drop File'}
-                </div>
+                <span className="text-[.72rem] font-bold text-muted2 italic py-2">No attachment</span>
             )}
         </div>
     );

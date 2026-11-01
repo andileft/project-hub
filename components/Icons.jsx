@@ -830,6 +830,28 @@ export const LayersIcon = ({ className, style, ...props }) => (
 );
 
 // Rows3 Icon - classic list view
+export const TableIcon = ({ className, style, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={style}
+    {...props}
+  >
+    <path d="M12 3v18" />
+    <rect width="18" height="18" x="3" y="3" rx="2" />
+    <path d="M3 9h18" />
+    <path d="M3 15h18" />
+  </svg>
+);
+
 export const Rows3Icon = ({ className, style, ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

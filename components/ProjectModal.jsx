@@ -33,22 +33,25 @@ const ProjectModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 dark:bg-slate-800 p-8 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight">{editingProject ? 'Edit Project' : 'New Project'}</h2>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:text-slate-300">
-            <XIcon />
+    <div className="fixed inset-0 z-50 bg-[rgba(29,28,33,.48)] backdrop-blur-sm flex items-center justify-center p-4 sm:p-6">
+      <div className="ph-slide-up bg-[var(--surface)] border border-[var(--line)] p-6 sm:p-8 rounded-hero w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-panel relative">
+        <div className="flex justify-between items-start gap-4 mb-6">
+          <div className="flex flex-col gap-1">
+            <span className="ph-kicker">{editingProject ? 'Update' : 'Create project'}</span>
+            <h2 className="font-display text-xl font-extrabold text-ink dark:text-[var(--ink)] tracking-tight">{editingProject ? 'Edit Project' : 'New Project'}</h2>
+          </div>
+          <button type="button" onClick={onClose} className="ph-icon-btn" aria-label="Close">
+            <XIcon className="h-5 w-5" />
           </button>
         </div>
         {formError && (
-          <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-700 text-sm font-bold flex items-start gap-3" role="alert">
-            <CheckCircle2Icon className="shrink-0 text-red-500 mt-0.5" aria-hidden="true" />
+          <div className="mb-6 p-4 rounded-2xl bg-[var(--red-soft)] border border-transparent text-[var(--red)] text-[.84rem] font-bold flex items-start gap-3" role="alert">
+            <CheckCircle2Icon className="shrink-0 h-4 w-4 mt-0.5" aria-hidden="true" />
             <span>{formError}</span>
           </div>
         )}
         <form onSubmit={onSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="md:col-span-2">
               <FormInput label="Project Name" value={formData.projName} onChange={v => onFormDataChange({ ...formData, projName: v })} required placeholder="Enter project title..." disabled={!isAdmin} />
             </div>
@@ -80,9 +83,9 @@ const ProjectModal = ({
                       showToast('error', 'Fetch from MOM failed: ' + (err.message || String(err)), 8000);
                     }
                   }}
-                  className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 mb-1"
+                  className="ph-chip ph-chip--wine text-[.62rem] uppercase tracking-wider mb-1"
                 >
-                  <SparklesIcon className="w-[10px] h-[10px]" />
+                  <SparklesIcon className="w-3 h-3" />
                   Fetch from MOM
                 </button>
               )}
@@ -95,19 +98,19 @@ const ProjectModal = ({
             <div className="md:col-span-2">
               <FormInput label="Solution" value={formData.solusi} onChange={v => onFormDataChange({ ...formData, solusi: v })} placeholder="Technical approach..." disabled={!isAdmin} />
             </div>
-            <div className="md:col-span-2">
-              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1 mb-1.5 block">Project Notes & Remarks</label>
+            <div className="md:col-span-2 ph-field">
+              <label className="ph-field__label">Project Notes &amp; Remarks</label>
               <textarea
                 disabled={!isAdmin}
-                className="w-full h-32 px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-semibold text-slate-700 dark:text-slate-200 text-sm disabled:opacity-75 shadow-inner placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                className="ph-textarea disabled:opacity-60"
                 value={formData.note}
                 onChange={e => onFormDataChange({ ...formData, note: e.target.value })}
                 placeholder="Document current progress, critical blockers, or important updates here..."
               ></textarea>
             </div>
 
-            <div className="md:col-span-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Project Attachments</label>
+            <div className="md:col-span-2 pt-4 border-t border-[var(--line)]">
+              <label className="block text-[.68rem] font-extrabold uppercase tracking-[.12em] text-muted2 mb-3">Project Attachments</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {['sdho', 'mom', 'kickoff', 'report'].map(key => (
                     <FileDropZone
@@ -122,10 +125,10 @@ const ProjectModal = ({
             </div>
           </div>
 
-          <div className="flex gap-4 pt-6">
-            <button type="button" onClick={onClose} className="flex-1 h-12 rounded-xl font-bold text-slate-400 dark:text-slate-500 border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 dark:bg-transparent transition-colors">Discard</button>
+          <div className="flex gap-4 pt-6 border-t border-[var(--line)]">
+            <button type="button" onClick={onClose} className="ph-btn ph-btn--outline flex-1">Discard</button>
             {isAdmin && (
-              <button type="submit" className="flex-1 h-12 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95">
+              <button type="submit" className="ph-btn ph-btn--primary flex-1">
                 {editingProject ? 'Update Project' : 'Launch Project'}
               </button>
             )}

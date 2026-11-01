@@ -23,9 +23,12 @@ import {
   getDownloadURL,
   deleteObject
 } from '../utils/firebase';
-import { Header, FilterBar, ProjectCard, Toast, GroupedProjectList, ListViewToolbar, BackToTopButton, buildGroups } from '../components';
+import {
+  Header, FilterBar, Toast, GroupedProjectList, ListViewToolbar, BackToTopButton, buildGroups,
+  ProjectTable, ProjectDetail
+} from '../components';
 import SkeletonLoader from '../components/SkeletonLoader';
-import { formatShortCurrency } from '../utils/formatting';
+import { formatShortCurrency, formatShortNumber } from '../utils/formatting';
 import { collectSolutionOptions, matchesSolution } from '../utils/solutions';
 import { TECH_HUB_URL } from '../constants/config';
 import { useLaborBudgets } from '../hooks/useLaborBudgets';
@@ -34,17 +37,20 @@ import { parseCSVFile } from '../utils/parsers';
  import { extractTextFromFile, uploadFileToStorage, deleteFileFromStorageByUrl } from './utils/file-utils.js';
 import { readProjParam, findProjectByProjNumber } from './utils/deeplink.js';
 
-// Stable DOM id for the row/card a deep link scrolls to.
-export const projectAnchorId = (projectId) => `deeplink-target-${projectId}`;
-
 const Dashboard = lazy(() => import('../components/Dashboard'));
 const ProjectModal = lazy(() => import('../components/ProjectModal'));
 
 // Persisted list view preferences
 const VIEW_MODE_KEY = 'ph_view_mode';
 const GROUP_BY_KEY = 'ph_group_by';
-const VIEW_MODES = ['new', 'classic'];
+const VIEW_MODES = ['new', 'table'];
 const GROUP_BYS = ['none', 'status', 'customer', 'pm', 'solusi'];
+
+// Table view sort (persisted so it survives view switches / reloads).
+const TABLE_SORT_KEY = 'ph_table_sort_key';
+const TABLE_SORT_DIR_KEY = 'ph_table_sort_dir';
+const TABLE_SORT_KEYS = ['projNumber', 'projName', 'customer', 'pm', 'status', 'value', 'sisaMandays', 'budget', 'end'];
+const TABLE_SORT_DIRS = ['asc', 'desc'];
 
 const readStored = (key, fallback, allowed) => {
   try {
@@ -64,28 +70,53 @@ const writeStored = (key, value) => {
   }
 };
 
-// Login form component
-const LoginForm = ({ onLogin, isLoggingIn }) => (
-  <form onSubmit={onLogin} className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 w-full max-w-md space-y-4">
-    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Sign in</h2>
-    <div>
-      <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Email</label>
-      <input name="email" type="email" required className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-700 dark:text-slate-200" placeholder="you@company.com" />
+// Login form component (wine auth split layout)
+const LoginForm = ({ onLogin, isLoggingIn }) => {
+  return (
+    <div className="grid md:grid-cols-2 max-w-4xl w-full bg-[var(--surface)] border border-[var(--line)] rounded-hero shadow-panel overflow-hidden">
+      <aside className="hidden md:flex flex-col gap-5 p-10 text-white relative" style={{ background: 'linear-gradient(135deg, var(--wine-solid), var(--wine-solid-2))' }}>
+        <div className="flex items-center gap-3">
+          <img src="logo-wine.png" alt="Project Hub" className="h-10 w-10 rounded-xl object-contain bg-white/10 p-1" />
+          <div className="leading-tight">
+            <div className="font-display font-extrabold text-lg tracking-tight">Project Hub</div>
+            <div className="text-[11px] font-semibold uppercase tracking-widest text-white/70">AGIT · Internal PMO</div>
+          </div>
+        </div>
+        <h1 className="font-display text-3xl font-extrabold leading-[1.05] tracking-tight mt-4">All projects, one source of truth.</h1>
+        <p className="text-sm text-white/80 leading-relaxed">Contract value, mandays, labor budget, team, and SDHO documents — in one place, kept in sync across the systems you already use.</p>
+        <div className="mt-auto grid grid-cols-3 gap-3 pt-6 border-t border-white/20">
+          <div><b className="block font-display text-xl font-extrabold">—</b><span className="text-[10px] uppercase tracking-wider text-white/60">Active</span></div>
+          <div><b className="block font-display text-xl font-extrabold">—</b><span className="text-[10px] uppercase tracking-wider text-white/60">Value</span></div>
+          <div><b className="block font-display text-xl font-extrabold">—</b><span className="text-[10px] uppercase tracking-wider text-white/60">Customers</span></div>
+        </div>
+      </aside>
+
+      <main className="p-8 sm:p-10 flex flex-col justify-center">
+        <span className="text-[11px] font-display font-extrabold uppercase tracking-[0.14em] text-wine mb-2">Internal portal</span>
+        <h2 className="font-display text-2xl font-extrabold text-ink dark:text-[var(--ink)] tracking-tight mb-1">Sign in to Project Hub</h2>
+        <p className="text-sm text-muted mb-6">Use your AGIT corporate account to continue.</p>
+        <form onSubmit={onLogin} className="space-y-4">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-muted2">Corporate email</span>
+            <input name="email" type="email" required autoComplete="username" className="h-11 px-3.5 rounded-input border border-[var(--line)] bg-[var(--surface)] text-ink2 dark:text-[var(--ink-2)] text-sm font-medium outline-none focus:border-wine-2 focus:ring-[3px] focus:ring-wine/10 transition" placeholder="name@ag-it.com" />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-muted2">Password</span>
+            <input name="password" type="password" required autoComplete="current-password" className="h-11 px-3.5 rounded-input border border-[var(--line)] bg-[var(--surface)] text-ink2 dark:text-[var(--ink-2)] text-sm font-medium outline-none focus:border-wine-2 focus:ring-[3px] focus:ring-wine/10 transition" placeholder="••••••••" />
+          </label>
+          <button type="submit" disabled={isLoggingIn} className="ph-btn ph-btn--primary ph-btn--block">
+            {isLoggingIn ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                Signing in...
+              </>
+            ) : 'Sign in'}
+          </button>
+        </form>
+      </main>
     </div>
-    <div>
-      <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Password</label>
-      <input name="password" type="password" required className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-700 dark:text-slate-200" placeholder="••••••••" />
-    </div>
-    <button type="submit" disabled={isLoggingIn} className="w-full h-11 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
-      {isLoggingIn ? (
-        <>
-          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-          Signing in...
-        </>
-      ) : 'Sign in'}
-    </button>
-  </form>
-);
+  );
+};
 
 const App = () => {
   // Authentication
@@ -137,6 +168,16 @@ const App = () => {
   const [groupBy, setGroupBy] = useState(() => readStored(GROUP_BY_KEY, 'status', GROUP_BYS));
   const [expandedIds, setExpandedIds] = useState(() => new Set());
   const [collapsedGroups, setCollapsedGroups] = useState(() => new Set());
+
+  // Phone detection: the table view only makes sense from tablet up, so on a
+  // phone we always render the stacked card view (and the toggle is hidden).
+  const [isPhone, setIsPhone] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  );
+
+  // Table view sort state (lifted so it survives view switches).
+  const [tableSortKey, setTableSortKey] = useState(() => readStored(TABLE_SORT_KEY, 'projNumber', TABLE_SORT_KEYS));
+  const [tableSortDir, setTableSortDir] = useState(() => readStored(TABLE_SORT_DIR_KEY, 'asc', TABLE_SORT_DIRS));
 
   // Form data
   const [formData, setFormData] = useState({
@@ -343,6 +384,21 @@ const App = () => {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
+
+  // Track phone/tablet breakpoint (matches Tailwind's `md`).
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const onChange = () => setIsPhone(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  // Persist table sort
+  useEffect(() => {
+    writeStored(TABLE_SORT_KEY, tableSortKey);
+    writeStored(TABLE_SORT_DIR_KEY, tableSortDir);
+  }, [tableSortKey, tableSortDir]);
 
   // Persist list view mode
   useEffect(() => {
@@ -640,8 +696,20 @@ const App = () => {
     setSearchTerm('');
   }, [dashboardYear]);
 
-  const handleFilterChange = useCallback((key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+  // Open the dedicated project detail view (deep-link target). Sets the in-app
+  // focus and mirrors it into the URL so the link is shareable/reloadable.
+  const openDetail = useCallback((project) => {
+    if (!project) return;
+    setActiveTab('list');
+    setFocusProjectId(project.id);
+    try {
+      const url = new URL(window.location.href);
+      if (project.projNumber) url.searchParams.set('proj', project.projNumber);
+      window.history.replaceState({}, '', url.pathname + url.search);
+    } catch { /* ignore */ }
+  }, []);
+
+  const handleFilterChange = useCallback((key, value) => {    setFilters(prev => ({ ...prev, [key]: value }));
   }, []);
 
   const handleSearchChange = useCallback((value) => {
@@ -664,8 +732,21 @@ const App = () => {
   // Stacked (New) view helpers
   const groupKeys = useMemo(() => buildGroups(filteredProjects, groupBy).map(g => g.key), [filteredProjects, groupBy]);
 
+  // Results summary for the New-design filter bar (derived from existing data).
+  const filterSummary = useMemo(() => {
+    const totalValue = filteredProjects.reduce((sum, p) => sum + (Number(p.value) || 0), 0);
+    const totalMandays = filteredProjects.reduce((sum, p) => sum + (Number(p.sisaMandays) || 0), 0);
+    const customers = new Set(filteredProjects.map(p => p.customer).filter(Boolean)).size;
+    return {
+      count: filteredProjects.length,
+      value: formatShortCurrency(totalValue),
+      mandays: formatShortNumber(totalMandays),
+      customers
+    };
+  }, [filteredProjects]);
+
   const toggleViewMode = useCallback(() => {
-    setViewMode(prev => (prev === 'classic' ? 'new' : 'classic'));
+    setViewMode(prev => (prev === 'new' ? 'table' : 'new'));
   }, []);
 
   const handleToggleCard = useCallback((id) => {
@@ -747,30 +828,36 @@ const App = () => {
   // Render
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-cream dark:bg-[var(--bg)] flex items-center justify-center p-4">
         <LoginForm onLogin={handleLoginSubmit} isLoggingIn={isLoggingIn} />
       </div>
     );
   }
 
-  // Focus mode: a deep link resolved to one project. Render only that project's
-  // card - no header, filters, list toolbar, or back button.
+  // Deep-link detail: a `?proj=` link resolves to one project and renders the
+  // dedicated detail view.
   const focusProject = focusProjectId ? projects.find(p => p.id === focusProjectId) : null;
   if (focusProject) {
+    const handleBackFromDetail = () => {
+      setFocusProjectId(null);
+      // Drop the ?proj= param so a reload lands on the normal list.
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('proj');
+        window.history.replaceState({}, '', url.pathname + url.search);
+      } catch { /* ignore */ }
+    };
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        <main className="max-w-7xl mx-auto px-4 py-6">
-          <div id={projectAnchorId(focusProject.id)} className="scroll-mt-24">
-            <ProjectCard
-              project={focusProject}
-              onEdit={handleOpenModal}
-              onDelete={handleDelete}
-              isAdmin={isAdmin}
-              laborBudget={laborBudgets[focusProject.id]}
-              memberAssignment={memberAssignments[focusProject.id]}
-            />
-          </div>
-        </main>
+      <div>
+        <ProjectDetail
+          project={focusProject}
+          onEdit={handleOpenModal}
+          onDelete={handleDelete}
+          onBack={handleBackFromDetail}
+          isAdmin={isAdmin}
+          laborBudget={laborBudgets[focusProject.id]}
+          memberAssignment={memberAssignments[focusProject.id]}
+        />
 
         {modalOpen && (
           <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="text-white">Loading modal...</div></div>}>
@@ -796,7 +883,7 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className='min-h-screen bg-cream dark:bg-[var(--bg)]'>
       <Header
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -812,7 +899,7 @@ const App = () => {
         onToggleViewMode={toggleViewMode}
       />
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className='mx-auto max-w-[1320px] px-4 py-6'>
         {activeTab === 'list' && (
           <>
             <FilterBar
@@ -823,6 +910,7 @@ const App = () => {
               onSearchChange={handleSearchChange}
               onFilterChange={handleFilterChange}
               onReset={resetFilters}
+              summary={filterSummary}
             />
 
              {!loading && !error && filteredProjects.length > 0 && viewMode === 'new' && (
@@ -839,15 +927,22 @@ const App = () => {
              ) : error ? (
               <div className="text-center py-12 text-red-600">{error}</div>
             ) : filteredProjects.length === 0 ? (
-              <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700"><p className="text-slate-500 dark:text-slate-400">No projects match the current filters.</p></div>
-            ) : viewMode === 'classic' ? (
-              <div className="flex flex-col gap-6">
-                {filteredProjects.map(project => (
-                  <div key={project.id} id={projectAnchorId(project.id)} className="scroll-mt-24">
-                    <ProjectCard project={project} onEdit={handleOpenModal} onDelete={handleDelete} isAdmin={isAdmin} laborBudget={laborBudgets[project.id]} memberAssignment={memberAssignments[project.id]} />
-                  </div>
-                ))}
+              <div className='text-center py-14 rounded-card border border-dashed border-[var(--line-2)]'>
+                <p className='text-muted'>No projects match the current filters.</p>
               </div>
+            ) : (viewMode === 'table' && !isPhone) ? (
+              <ProjectTable
+                projects={filteredProjects}
+                isAdmin={isAdmin}
+                onEdit={handleOpenModal}
+                onDelete={handleDelete}
+                laborBudgets={laborBudgets}
+                memberAssignments={memberAssignments}
+                onOpenDetail={openDetail}
+                sortKey={tableSortKey}
+                sortDir={tableSortDir}
+                onSortChange={(key, dir) => { setTableSortKey(key); setTableSortDir(dir); }}
+              />
             ) : (
               <GroupedProjectList
                 projects={filteredProjects}
@@ -861,6 +956,7 @@ const App = () => {
                 onDelete={handleDelete}
                 laborBudgets={laborBudgets}
                 memberAssignments={memberAssignments}
+                onOpenDetail={openDetail}
               />
             )}
           </>

@@ -1,8 +1,6 @@
 import React from 'react';
-
-// NOTE: StatCard component must be available. Import from './StatCard.jsx'
 import StatCard from './StatCard.jsx';
-import { formatShortCurrency } from '../utils/formatting.js';
+import { formatShortNumber, formatShortCurrency } from '../utils/formatting.js';
 import {
   BarChart3Icon,
   TrendingUpIcon,
@@ -11,206 +9,190 @@ import {
   UsersIcon,
   AlertTriangleIcon,
   TrophyIcon,
-  UserCheckIcon
+  UserCheckIcon,
+  ShieldCheckIcon
 } from './Icons';
 
-export const Dashboard = ({
-  dashboardData,
-  dashboardYear,
-  onYearChange,
-  onProjectClick,
-  onPMClick,
-  onCustomerClick
-}) => {
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const daysTo = (raw) => {
+  if (!raw) return null;
+  const m = String(raw).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  const d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(raw);
+  if (Number.isNaN(d.getTime())) return null;
+  const today = new Date();
+  const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() - t0.getTime()) / 86400000);
+};
+
+const RankRow = ({ idx, label, valueText, ratio, tone = '', onClick }) => (
+  <button type="button" onClick={onClick} className="w-full text-left group">
+    <div className="flex items-center justify-between gap-3 text-[.78rem] font-bold mb-1.5">
+      <span className="truncate flex items-center gap-2 min-w-0 group-hover:text-wine transition-colors">
+        <span className="text-muted2 tabular-nums shrink-0">#{idx}</span>
+        <span className="truncate">{label}</span>
+      </span>
+      <span className="text-wine tabular-nums shrink-0">{valueText}</span>
+    </div>
+    <div className={`ph-progress ${tone}`}><span style={{ width: `${Math.max(2, Math.min(100, ratio * 100))}%` }} /></div>
+  </button>
+);
+
+export const Dashboard = ({ dashboardData, dashboardYear, onYearChange, onProjectClick, onPMClick, onCustomerClick }) => {
+  const belum = dashboardData?.belumSdhoProjects || [];
+  const rootRef = React.useRef(null);
+
+  // Staggered reveal for stat cards and panels.
+  React.useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const reduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const items = root.querySelectorAll('.reveal');
+    items.forEach((el, i) => {
+      el.style.transitionDelay = reduce ? '0ms' : `${Math.min(i * 30, 300)}ms`;
+      el.classList.remove('in');
+    });
+    const raf = requestAnimationFrame(() => requestAnimationFrame(() => {
+      items.forEach((el) => el.classList.add('in'));
+    }));
+    return () => cancelAnimationFrame(raf);
+  }, [dashboardYear]);
+
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-        <div className="flex items-center gap-3">
-           <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-             <BarChart3Icon className="h-5 w-5 text-indigo-600" />
-           </div>
-          <div>
-            <h2 className="font-bold text-slate-800 dark:text-slate-100">Portfolio Analytics</h2>
-          </div>
+    <div ref={rootRef} className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+          <span className="ph-kicker">Portfolio analytics</span>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink dark:text-[var(--ink)] mt-2">Project Hub</h1>
+          <p className="text-[.86rem] text-muted mt-1">Active portfolio at a glance — value, mandays, and SDHO risk recalculated whenever data changes.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Year Filter:</label>
-          <select
-            className="h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-black text-indigo-600 outline-none focus:ring-2 focus:ring-indigo-500"
-            value={dashboardYear}
-            onChange={(e) => onYearChange(e.target.value)}
-          >
+        <label className="ph-field min-w-[200px]">
+          <span className="ph-field__label">Global Year Filter</span>
+          <select className="ph-select" value={dashboardYear} onChange={(e) => onYearChange(e.target.value)}>
             <option value="All">All History</option>
             {dashboardData?.availableYears.map(year => <option key={year} value={year}>{year}</option>)}
           </select>
-        </div>
+        </label>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* KPI strip */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           title="Active Projects"
           value={dashboardData?.activeCount || 0}
-          icon={
-            <TrendingUpIcon className="h-6 w-6 text-emerald-500" />
-          }
-          subtitle={`Filtering: ${dashboardYear}`}
+          countup
+          icon={<TrendingUpIcon className="h-6 w-6 text-[var(--green)]" />}
+          foot={<span>Ongoing · Maintenance · Belum SDHO</span>}
         />
         <StatCard
           title="Total Value"
           value={formatShortCurrency(dashboardData?.totalValue || 0)}
-          icon={
-            <DollarSignIcon className="h-6 w-6 text-indigo-500" />
-          }
-          subtitle="Market Share Value"
+          icon={<DollarSignIcon className="h-6 w-6 text-wine" />}
+          subtitle="Market share value"
         />
         <StatCard
           title="Total Mandays"
-          value={formatShortCurrency(dashboardData?.totalMandays || 0)}
-          icon={
-            <BanknoteIcon className="h-6 w-6 text-emerald-500" />
-          }
-          subtitle="Portfolio Workload Value"
+          value={formatShortNumber(dashboardData?.totalMandays || 0)}
+          icon={<BanknoteIcon className="h-6 w-6 text-[var(--green)]" />}
+          subtitle="Portfolio workload"
         />
         <StatCard
           title="Key Entities"
           value={dashboardData?.topCustomers.length || 0}
-          icon={
-            <UsersIcon className="h-6 w-6 text-orange-500" />
-          }
-          subtitle="Active Partnerships"
+          countup
+          icon={<UsersIcon className="h-6 w-6 text-[var(--orange)]" />}
+          subtitle="Active partnerships"
         />
-      </div>
+      </section>
 
-      <div className="dashboard-card border-amber-200 bg-amber-50/20">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-             <div className="p-2 bg-amber-100 text-amber-600 rounded-xl">
-               <AlertTriangleIcon className="h-5 w-5 text-amber-600" />
-             </div>
-            <div>
-              <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm">Belum SDHO Queue</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Pending Acceptance Confirmation</p>
-            </div>
+      {/* Belum SDHO queue */}
+      <section className="ph-card">
+        <div className="ph-card__head">
+          <div className="ph-card__title">
+            <span className="w-9 h-9 rounded-xl grid place-items-center bg-[var(--amber-soft)] text-[var(--amber)]"><AlertTriangleIcon className="h-4 w-4" /></span>
+            Belum SDHO Queue
           </div>
-          <button
-            onClick={() => { onProjectClick('Belum SDHO'); }}
-            className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
-          >
-            View All ({dashboardData?.belumSdhoProjects.length})
-          </button>
+          <span className="ph-card__hint">Pending acceptance confirmation</span>
+          <button onClick={() => onProjectClick('Belum SDHO')} className="ph-btn ph-btn--ghost ph-btn--sm">View all ({belum.length})</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {dashboardData?.belumSdhoProjects.slice(0, 6).map((p) => (
-            <button
-              key={p.id}
-              onClick={() => onProjectClick(p.id)}
-              className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-indigo-400 text-left group transition-all"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-[9px] font-black text-slate-300 uppercase tabular-nums">ID: {p.projNumber || 'N/A'}</span>
-                <span className="text-xs font-black text-amber-600 tabular-nums">{formatShortCurrency(p.value)}</span>
-              </div>
-              <h4 className="font-bold text-slate-800 dark:text-slate-100 text-xs truncate mb-1 group-hover:text-indigo-600">{p.projName}</h4>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">{p.customer}</p>
-            </button>
-          ))}
-          {dashboardData?.belumSdhoProjects.length === 0 && (
-            <div className="col-span-full py-8 text-center bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-600">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No projects in Belum SDHO status</p>
+          {belum.slice(0, 6).map((p) => {
+            const d = daysTo(p.end);
+            const agingRatio = d == null ? 0 : d < 0 ? Math.min(1, -d / 60) : Math.min(1, 1 - d / 60);
+            return (
+              <button key={p.id} onClick={() => onProjectClick(p.id)} className="text-left rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 hover:shadow-lift hover:border-[var(--line-2)] transition-all group">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <span className="font-mono text-[.68rem] font-bold text-muted2">ID: {p.projNumber || 'N/A'}</span>
+                  <span className="text-[.8rem] font-extrabold text-[var(--amber)] tabular-nums">{formatShortNumber(Number(p.value) || 0)}</span>
+                </div>
+                <h4 className="font-bold text-[.88rem] text-ink dark:text-[var(--ink)] truncate group-hover:text-wine transition-colors">{p.projName}</h4>
+                <p className="text-[.76rem] text-muted truncate mb-3">{p.customer}</p>
+                <div className="ph-progress ph-progress--orange mb-1.5"><span style={{ width: `${Math.max(4, agingRatio * 100)}%` }} /></div>
+                <p className="text-[.68rem] text-muted2">{d == null ? 'No end date' : d < 0 ? `${-d} days since end date` : `${d} days until end date`}</p>
+              </button>
+            );
+          })}
+          {belum.length === 0 && (
+            <div className="col-span-full py-10 text-center rounded-2xl border border-dashed border-[var(--line-2)]">
+              <p className="text-[.72rem] font-extrabold text-muted2 uppercase tracking-[.12em]">No projects in Belum SDHO status</p>
             </div>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="dashboard-card">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="dashboard-title mb-0">Top 10 Projects by Value</h3>
-            <TrophyIcon className="h-4 w-4 text-amber-400" />
+      {/* Rankings */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="ph-card">
+          <div className="ph-card__head">
+            <div className="ph-card__title"><TrophyIcon className="h-4 w-4 text-[var(--orange)]" />Top 10 Projects by Value</div>
+            <span className="ph-card__hint">click to open</span>
           </div>
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3.5">
             {dashboardData?.topProjectsByValue.map((p, i) => (
-              <button key={p.id} onClick={() => onProjectClick(p.id)} className="w-full space-y-1 text-left group">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="truncate pr-4 group-hover:text-indigo-600 flex items-center gap-2">
-                    <span className="text-[10px] text-slate-300">#{i + 1}</span> {p.projName}
-                  </span>
-                  <span className="text-indigo-600">{formatShortCurrency(p.value)}</span>
-                </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${(p.value / (dashboardData.topProjectsByValue[0]?.value || 1)) * 100}%` }}></div>
-                </div>
-              </button>
+              <RankRow key={p.id} idx={i + 1} label={p.projName} valueText={formatShortNumber(Number(p.value) || 0)} ratio={(Number(p.value) || 0) / (Number(dashboardData.topProjectsByValue[0]?.value) || 1)} onClick={() => onProjectClick(p.id)} />
             ))}
           </div>
         </div>
 
-        <div className="dashboard-card">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="dashboard-title mb-0">Top 10 Projects by Mandays</h3>
-            <BanknoteIcon className="h-4 w-4 text-emerald-400" />
+        <div className="ph-card">
+          <div className="ph-card__head">
+            <div className="ph-card__title"><BanknoteIcon className="h-4 w-4 text-[var(--green)]" />Top 10 Projects by Mandays</div>
           </div>
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3.5">
             {dashboardData?.topProjectsByMandays.map((p, i) => (
-              <button key={p.id} onClick={() => onProjectClick(p.id)} className="w-full space-y-1 text-left group">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="truncate pr-4 group-hover:text-indigo-600 flex items-center gap-2">
-                    <span className="text-[10px] text-slate-300">#{i + 1}</span> {p.projName}
-                  </span>
-                  <span className="text-emerald-600">{formatShortCurrency(p.sisaMandays)}</span>
-                </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${(p.sisaMandays / (dashboardData.topProjectsByMandays[0]?.sisaMandays || 1)) * 100}%` }}></div>
-                </div>
-              </button>
+              <RankRow key={p.id} idx={i + 1} label={p.projName} valueText={formatShortNumber(Number(p.sisaMandays) || 0)} ratio={(Number(p.sisaMandays) || 0) / (Number(dashboardData.topProjectsByMandays[0]?.sisaMandays) || 1)} onClick={() => onProjectClick(p.id)} />
             ))}
           </div>
         </div>
 
-        <div className="dashboard-card">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="dashboard-title mb-0">PM Workload (Active Projects)</h3>
-            <UserCheckIcon className="h-3.5 w-3.5 text-slate-300" />
+        <div className="ph-card">
+          <div className="ph-card__head">
+            <div className="ph-card__title"><UserCheckIcon className="h-4 w-4 text-wine" />PM Workload <span className="ph-card__hint">(Active)</span></div>
           </div>
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3.5">
             {dashboardData?.topPMs.map(([pm, count], i) => (
-              <button key={pm} onClick={() => onPMClick(pm)} className="w-full space-y-1 text-left group">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="truncate pr-4 group-hover:text-indigo-600 flex items-center gap-2">
-                    <span className="text-[10px] text-slate-300">#{i + 1}</span> {pm}
-                  </span>
-                  <span className="text-indigo-600">{count} Projects</span>
-                </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div className="bg-blue-500 h-full rounded-full transition-all duration-500" style={{ width: `${(count / (dashboardData.topPMs[0]?.[1] || 1)) * 100}%` }}></div>
-                </div>
-              </button>
+              <RankRow key={pm} idx={i + 1} label={pm} valueText={`${count} projects`} ratio={count / (dashboardData.topPMs[0]?.[1] || 1)} onClick={() => onPMClick(pm)} />
             ))}
           </div>
         </div>
 
-        <div className="dashboard-card">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="dashboard-title mb-0">Top 10 Customers (By Total Value)</h3>
-            <UsersIcon className="h-4 w-4 text-slate-300" />
+        <div className="ph-card">
+          <div className="ph-card__head">
+            <div className="ph-card__title"><UsersIcon className="h-4 w-4 text-muted2" />Top 10 Customers <span className="ph-card__hint">(By Total Value)</span></div>
           </div>
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3.5">
             {dashboardData?.topCustomers.map(([cust, val], i) => (
-              <button key={cust} onClick={() => onCustomerClick(cust)} className="w-full space-y-1 text-left group">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="truncate pr-4 group-hover:text-indigo-600 flex items-center gap-2">
-                    <span className="text-[10px] text-slate-300">#{i + 1}</span> {cust}
-                  </span>
-                  <span className="text-indigo-600">{formatShortCurrency(val)}</span>
-                </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${(val / (dashboardData.topCustomers[0]?.[1] || 1)) * 100}%` }}></div>
-                </div>
-              </button>
+              <RankRow key={cust} idx={i + 1} label={cust} valueText={formatShortNumber(Number(val) || 0)} ratio={(Number(val) || 0) / (Number(dashboardData.topCustomers[0]?.[1]) || 1)} tone="ph-progress--green" onClick={() => onCustomerClick(cust)} />
             ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      <p className="text-center text-[.72rem] text-muted2 flex items-center justify-center gap-1.5">
+        <ShieldCheckIcon className="h-3.5 w-3.5" />
+        Metrics derived from existing project data only.
+      </p>
     </div>
   );
 };

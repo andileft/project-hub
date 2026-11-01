@@ -66,45 +66,47 @@ Capabilities & Instructions:
   };
 
   return (
-    <div className="fixed bottom-24 right-6 w-80 md:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
-      <div className="bg-indigo-600 p-4 flex justify-between items-center text-white">
+    <div className="ph-slide-up fixed bottom-24 right-6 w-80 md:w-96 bg-[var(--surface)] rounded-card shadow-panel border border-[var(--line)] overflow-hidden flex flex-col z-50">
+      <div className="p-4 flex justify-between items-center text-white" style={{ background: 'linear-gradient(135deg, var(--wine-solid), var(--wine-solid-2))' }}>
         <div className="flex items-center gap-2">
           <SparklesIcon className="w-5 h-5" />
-          <span className="font-bold text-sm">AI Portfolio Advisor</span>
+          <span className="font-display font-bold text-sm">AI Portfolio Advisor</span>
         </div>
-        <button onClick={onClose} className="hover:bg-white dark:bg-slate-800/20 p-1 rounded-lg transition-colors">
+        <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-lg transition-colors" aria-label="Close">
           <XIcon className="w-4 h-4" />
         </button>
       </div>
-      <div className="h-[400px] overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-900" ref={scrollRef}>
+      <div className="h-[400px] overflow-y-auto p-4 space-y-3 bg-[var(--surface-2)]" ref={scrollRef}>
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-3 rounded-2xl text-xs font-medium leading-relaxed ${m.role === 'user'
-                ? 'bg-indigo-600 text-white rounded-br-none shadow-sm'
-                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-bl-none shadow-sm prose dark:prose-invert prose-slate'
-              }`}>
+            <div className={`max-w-[85%] p-3 text-[.78rem] font-medium leading-relaxed border ${m.role === 'user'
+                ? 'text-white border-transparent rounded-2xl rounded-br-md'
+                : 'bg-[var(--surface)] text-ink2 dark:text-[var(--ink-2)] border-[var(--line)] rounded-2xl rounded-bl-md'
+              }`}
+              style={m.role === 'user' ? { background: 'linear-gradient(135deg, var(--wine), var(--wine-2))' } : undefined}
+            >
               {m.role === 'assistant' ? <span dangerouslySetInnerHTML={{ __html: formatAssistantMessageHtml(m.text) }} /> : m.text}
             </div>
           </div>
         ))}
         {isAiThinking && (
           <div className="flex justify-start">
-            <div className="bg-white dark:bg-slate-800 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl rounded-bl-none shadow-sm flex gap-1 items-center">
-              <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
-              <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-              <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            <div className="bg-[var(--surface)] border border-[var(--line)] p-3 rounded-2xl rounded-bl-md flex gap-1 items-center">
+              <div className="w-1.5 h-1.5 bg-wine-2 rounded-full animate-bounce"></div>
+              <div className="w-1.5 h-1.5 bg-wine-2 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+              <div className="w-1.5 h-1.5 bg-wine-2 rounded-full animate-bounce [animation-delay:0.4s]"></div>
             </div>
           </div>
         )}
       </div>
-      <form onSubmit={handleSend} className="p-3 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-800 flex gap-2">
+      <form onSubmit={handleSend} className="p-3 bg-[var(--surface)] border-t border-[var(--line)] flex gap-2">
         <input
-          className="flex-1 bg-slate-100 dark:bg-slate-800 border-0 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+          className="ph-input flex-1 !py-2 text-[.78rem]"
           placeholder="Ask about project docs or analysis..."
           value={input}
           onChange={e => setInput(e.target.value)}
         />
-        <button type="submit" disabled={!input.trim() || isAiThinking} className="bg-indigo-600 text-white p-2 rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        <button type="submit" disabled={!input.trim() || isAiThinking} className="ph-btn ph-btn--primary !min-h-0 !p-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed">
           <SendHorizontalIcon className="w-4 h-4" />
         </button>
       </form>

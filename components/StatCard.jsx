@@ -1,16 +1,54 @@
 import React from 'react';
 
-const StatCard = ({ title, value, icon, subtitle }) => (
-  <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
-    <div className="flex items-start justify-between mb-4">
-      <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/30 transition-colors">{icon}</div>
-      {subtitle && <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded-full">{subtitle}</span>}
+// Stable formatter identity: defining it inline as a default parameter would
+// create a new function on every render, retriggering the effect forever.
+const defaultFormatter = (n) => Math.round(n).toLocaleString('en-US');
+
+const CountUp = ({ value, duration = 700, formatter }) => {
+  const fmtRef = React.useRef(formatter || defaultFormatter);
+  fmtRef.current = formatter || defaultFormatter;
+
+  const [display, setDisplay] = React.useState(() => fmtRef.current(value));
+
+  React.useEffect(() => {
+    const fmt = fmtRef.current;
+    // Non-numeric or reduced-motion: show the final value directly.
+    if (typeof value !== 'number' || !isFinite(value)) { setDisplay(fmt(value)); return; }
+    const reduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { setDisplay(fmt(value)); return; }
+
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(fmt(value * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else setDisplay(fmt(value));
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+
+  return <>{display}</>;
+};
+
+const StatCard = ({ title, value, icon, subtitle, delta, deltaTone = 'flat', foot, countup }) => {
+  const toneClass = deltaTone === 'up' ? 'ph-delta--up' : deltaTone === 'down' ? 'ph-delta--down' : 'ph-delta--flat';
+  return (
+    <div className="ph-stat reveal">
+      <div className="ph-stat__top">
+        <span className="ph-stat__icon">{icon}</span>
+        {delta && <span className={`ph-delta ${toneClass}`}>{delta}</span>}
+        {!delta && subtitle && <span className="text-[.68rem] text-muted2">{subtitle}</span>}
+      </div>
+      <div className="ph-stat__label">{title}</div>
+      <div className="ph-stat__value">
+        {countup && typeof value === 'number' ? <CountUp value={value} /> : value}
+      </div>
+      {foot && <div className="ph-stat__foot">{foot}</div>}
     </div>
-    <div>
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{title}</p>
-      <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">{value}</p>
-    </div>
-  </div>
-);
+  );
+};
 
 export default React.memo(StatCard);

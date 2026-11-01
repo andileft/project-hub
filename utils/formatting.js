@@ -29,6 +29,37 @@ export function getStatusClasses(status) {
 }
 
 /**
+ * Returns the New-design status chip class for a given project status.
+ * Works with the `.ph-status` primitive (wine/orange design system).
+ * @param {string} status - The project status
+ * @returns {string} `ph-status ph-status--*` class string
+ */
+export function getStatusChipClass(status) {
+  switch (status) {
+    case 'Ongoing': return 'ph-status ph-status--ongoing';
+    case 'Maintenance': return 'ph-status ph-status--maintenance';
+    case 'Belum SDHO': return 'ph-status ph-status--belum';
+    case 'Done': return 'ph-status ph-status--done';
+    default: return 'ph-status ph-status--archived';
+  }
+}
+
+/**
+ * Returns the New-design status dot color (CSS var) for grouping headers.
+ * @param {string} status - The project status
+ * @returns {string} CSS color value
+ */
+export function getStatusDotColor(status) {
+  switch (status) {
+    case 'Ongoing': return 'var(--blue)';
+    case 'Maintenance': return 'var(--wine)';
+    case 'Belum SDHO': return 'var(--amber)';
+    case 'Done': return 'var(--green)';
+    default: return 'var(--muted-2)';
+  }
+}
+
+/**
  * Formats a number as short value (B for billions, M for millions) without a currency prefix.
  * Mirrors formatShortCurrency so values and counters (e.g. mandays) share one style.
  * @param {number} val - The value to format

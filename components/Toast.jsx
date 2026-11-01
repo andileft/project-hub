@@ -1,17 +1,26 @@
 import React from 'react';
 
-const Toast = ({ toast, onClear }) => {
+const VARIANT = {
+    error: { chip: 'ph-chip--red', label: 'Error' },
+    success: { chip: 'ph-chip--green', label: 'Success' },
+    info: { chip: 'ph-chip--blue', label: 'Info' }
+};
+
+const Toast = ({ toast, onClear, duration = 5000 }) => {
     if (!toast) return null;
+    const v = VARIANT[toast.variant] || VARIANT.info;
     return (
         <div
-            className={`fixed bottom-6 left-1/2 z-[70] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-2xl border shadow-xl px-4 py-3 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-200 ${toast.variant === 'error' ? 'bg-red-50 border-red-200 text-red-900' : toast.variant === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-950' : 'bg-slate-900 border-slate-700 text-white'}`}
+            className="ph-toast fixed bottom-6 right-6 z-[70] w-[calc(100%-3rem)] max-w-sm rounded-2xl border border-[var(--line)] bg-[var(--surface)] shadow-panel px-4 py-3 flex items-start gap-3"
+            style={{ '--toast-dur': `${duration}ms` }}
             role="status"
         >
-            <p className="text-sm font-bold leading-snug flex-1 pt-0.5">{toast.message}</p>
+            <span className={`ph-chip ${v.chip} shrink-0 mt-0.5 text-[.62rem] uppercase tracking-wider`}>{v.label}</span>
+            <p className="text-[.84rem] font-semibold leading-snug flex-1 text-ink dark:text-[var(--ink)]">{toast.message}</p>
             <button
                 type="button"
                 onClick={onClear}
-                className={`shrink-0 rounded-lg p-1.5 font-bold text-xs uppercase tracking-wide ${toast.variant === 'error' ? 'text-red-600 hover:bg-red-100' : toast.variant === 'success' ? 'text-emerald-700 hover:bg-emerald-100/80' : 'text-slate-300 hover:bg-slate-800'}`}
+                className="shrink-0 rounded-lg p-1 text-muted hover:text-ink transition-colors"
                 aria-label="Dismiss notification"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -19,6 +28,7 @@ const Toast = ({ toast, onClear }) => {
                     <path d="m6 6 12 12" />
                 </svg>
             </button>
+            {onClear && <span className="ph-toast-progress" />}
         </div>
     );
 };

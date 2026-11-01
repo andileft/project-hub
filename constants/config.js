@@ -19,6 +19,8 @@ export const firebaseConfig = {
 };
 
 export const TECH_HUB_URL = import.meta.env.VITE_TECH_HUB_URL || 'https://tech-hub-22966312336.asia-southeast2.run.app';
+// Tech Hub API base for the project Copilot chat (defaults to the app URL).
+export const TECH_HUB_API_URL = import.meta.env.VITE_TECH_HUB_API_URL || TECH_HUB_URL;
 export const ASSIGNMENT_GEN_URL = import.meta.env.VITE_ASSIGNMENT_GEN_URL || '';
 
 // GL accounts considered "labor" rows in projects/{id}/financials

@@ -8,8 +8,8 @@ import {
   SunIcon,
   MoonIcon,
   LogOutIcon,
-  LayersIcon,
-  Rows3Icon
+  Rows3Icon,
+  TableIcon
 } from './Icons';
 
 const Header = ({
@@ -24,86 +24,74 @@ const Header = ({
   onToggleTheme,
   isAuthenticated,
   viewMode,
-  onToggleViewMode
+  onToggleViewMode,
 }) => {
   if (!isAuthenticated) return null;
 
   return (
-    <header className="bg-white dark:bg-slate-800 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <img src="logo.png" alt="Project Hub" className="h-8 w-8 rounded-lg object-contain" />
-            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Project Hub</h1>
-          </div>
-          <nav className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+    <header className="sticky top-0 z-30 bg-[var(--surface)] backdrop-blur border-b border-[var(--line)]">
+      <div className="mx-auto max-w-[1320px] px-4 py-3 flex flex-col lg:flex-row lg:items-center gap-3">
+        <div className="flex items-center gap-4 min-w-0">
+          <a href="#" className="flex items-center gap-3 shrink-0" onClick={(e) => e.preventDefault()}>
+            <img src="logo-wine.png" alt="Project Hub" className="h-10 w-10 rounded-xl object-contain" />
+            <span className="leading-tight hidden sm:block">
+              <span className="block font-display font-extrabold text-lg tracking-tight text-ink dark:text-[var(--ink)]">Project Hub</span>
+              <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted2">AGIT · Internal PMO</span>
+            </span>
+          </a>
+          <span className="hidden lg:block w-px h-8 bg-[var(--line-2)]" />
+          <nav className="ph-seg order-3 lg:order-none w-full lg:w-auto overflow-x-auto">
             <button
               onClick={() => onTabChange('list')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'list' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+              className={`ph-seg__btn flex items-center gap-2 ${activeTab === 'list' ? 'is-active' : ''}`}
             >
               <ListIcon className="h-4 w-4" />
-              List
+              Projects
             </button>
             <button
               onClick={() => onTabChange('dashboard')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'dashboard' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
+              className={`ph-seg__btn flex items-center gap-2 ${activeTab === 'dashboard' ? 'is-active' : ''}`}
             >
               <LayoutDashboardIcon className="h-4 w-4" />
               Dashboard
             </button>
           </nav>
         </div>
-        <div className="flex items-center gap-2 md:gap-4 flex-wrap">
-          {activeTab === 'list' && (
+
+        <div className="flex items-center gap-2 lg:ml-auto flex-wrap">
+          {activeTab === 'list' && isAdmin && (
             <>
-              {isAdmin && (
-                <>
-                  <button
-                    onClick={onTruncate}
-                    title="Truncate DB"
-                    aria-label="Truncate DB"
-                    className="h-10 px-3 md:px-4 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all flex items-center gap-2 border border-red-100"
-                  >
-                    <Trash2Icon className="h-4 w-4" />
-                    <span className="hidden md:inline">Truncate DB</span>
-                  </button>
-                  <button
-                    onClick={onImport}
-                    title="Import"
-                    aria-label="Import"
-                    className="h-10 px-3 md:px-4 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-xl transition-all flex items-center gap-2 border border-slate-200 dark:border-slate-600"
-                  >
-                    <UploadIcon className="h-4 w-4" />
-                    <span className="hidden md:inline">Import</span>
-                  </button>
-                  <button
-                    onClick={onCreate}
-                    className="h-10 px-4 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all flex items-center gap-2"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    New
-                  </button>
-                </>
-              )}
+              <button onClick={onTruncate} title="Truncate DB" aria-label="Truncate DB" className="ph-btn ph-btn--danger ph-btn--sm">
+                <Trash2Icon className="h-4 w-4" />
+                <span className="hidden md:inline">Truncate</span>
+              </button>
+              <button onClick={onImport} title="Import CSV" aria-label="Import CSV" className="ph-btn ph-btn--outline ph-btn--sm">
+                <UploadIcon className="h-4 w-4" />
+                <span className="hidden md:inline">Import</span>
+              </button>
+              <button onClick={onCreate} className="ph-btn ph-btn--primary ph-btn--sm">
+                <PlusIcon className="h-4 w-4" />
+                New Project
+              </button>
             </>
           )}
+
           {activeTab === 'list' && (
             <button
               onClick={onToggleViewMode}
-              title={viewMode === 'classic' ? 'New view' : 'Classic view'}
-              className="p-2 text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400"
+              title={viewMode === 'table' ? 'Switch to stacked rows' : 'Switch to table view'}
+              aria-label="Toggle list view"
+              className="ph-icon-btn hidden md:inline-grid"
             >
-              {viewMode === 'classic' ? <LayersIcon className="h-5 w-5" /> : <Rows3Icon className="h-5 w-5" />}
+              {viewMode === 'table' ? <Rows3Icon className="h-5 w-5" /> : <TableIcon className="h-5 w-5" />}
             </button>
           )}
-          <button onClick={onToggleTheme} className="p-2 text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400">
-            {theme === 'dark' ? (
-              <SunIcon className="h-5 w-5" />
-            ) : (
-              <MoonIcon className="h-5 w-5" />
-            )}
+
+          <button onClick={onToggleTheme} title="Toggle theme" aria-label="Toggle theme" className="ph-icon-btn">
+            {theme === 'dark' ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
           </button>
-          <button onClick={onLogout} className="p-2 text-slate-400 hover:text-red-500">
+
+          <button onClick={onLogout} title="Sign out" aria-label="Sign out" className="ph-icon-btn hover:!text-red-500">
             <LogOutIcon className="h-5 w-5" />
           </button>
         </div>
