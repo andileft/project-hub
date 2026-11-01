@@ -8,7 +8,7 @@ import {
 } from '../utils/formatting';
 import { parseNoteUpdates } from '../utils/parsers';
 import { TECH_HUB_URL } from '../constants/config';
-import { askTechHubChat, getTechHubFileUrl } from '../utils/techHubChat';
+import { askTechHubChat, downloadTechHubFile } from '../utils/techHubChat';
 import {
   laborSeverity,
   assignmentSeverity,
@@ -112,7 +112,6 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
   const [chatThinking, setChatThinking] = useState(false);
   const [openingDocId, setOpeningDocId] = useState(null);
   const chatRef = React.useRef(null);
-  const signedUrlCache = React.useRef(new Map());
 
   // ---- Data fetch (same sources as ProjectCard) ----
   useEffect(() => {
@@ -256,27 +255,37 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
     }
   };
 
-  // Open a cited source file: resolve a short-lived signed URL then open it.
-  // Tech Hub matches on the logical source-file id (`structData.docId`), which
-  // the citation exposes as `filter_doc_id`; `doc_id` is the chunk document id.
-  const sourceDocId = (c) => c?.filter_doc_id || c?.metadata?.docId || c?.doc_id || '';
+  // Open a cited source file. Tech Hub streams the bytes (proxy) which avoids
+  // signed URLs — those need a service-account private key the Cloud Run
+  // runtime does not have. We fetch the blob then open/download it locally.
+  const VIEWABLE_EXT = ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'csv', 'txt', 'html'];
 
   const handleOpenSource = async (cit) => {
-    const docId = sourceDocId(cit);
-    if (!docId || openingDocId) return;
+    const storagePath = cit?.metadata?.storage_path;
+    const filename = cit?.filename || cit?.metadata?.original_filename || 'file';
+    if (!storagePath || openingDocId) return;
 
-    // Reuse a URL requested in the last 10 minutes (signed URLs live 15 min).
-    const cached = signedUrlCache.current.get(docId);
-    if (cached && cached.exp > Date.now()) {
-      window.open(cached.url, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    setOpeningDocId(docId);
+    setOpeningDocId(storagePath);
     try {
-      const { url } = await getTechHubFileUrl({ projNumber: project.projNumber, docId });
-      signedUrlCache.current.set(docId, { url, exp: Date.now() + 10 * 60 * 1000 });
-      window.open(url, '_blank', 'noopener,noreferrer');
+      const { blob } = await downloadTechHubFile({
+        projNumber: project.projNumber,
+        storagePath,
+        filename,
+      });
+      const url = URL.createObjectURL(blob);
+      const ext = String(filename).split('.').pop()?.toLowerCase() || '';
+      if (VIEWABLE_EXT.includes(ext)) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      }
     } catch (err) {
       setChatMessages((prev) => [...prev, {
         role: 'assistant',
@@ -640,9 +649,9 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
                         {m.citations?.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mt-2.5 pt-2.5 border-t border-[var(--line)]">
                             <span className="text-[.62rem] font-extrabold uppercase tracking-wider text-muted2 self-center mr-0.5">Sources</span>                            {m.citations.map((c, ci) => {
-                              const id = sourceDocId(c);
-                              const canOpen = !!id;
-                              const busy = !!id && openingDocId === id;
+                              const storagePath = c?.metadata?.storage_path;
+                              const canOpen = !!storagePath;
+                              const busy = canOpen && openingDocId === storagePath;
                               const title = [c.citation || c.filename, canOpen ? 'Klik untuk membuka file' : 'File sumber tidak tersedia'].filter(Boolean).join(' — ');
                               return canOpen ? (
                                 <button

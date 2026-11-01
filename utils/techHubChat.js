@@ -86,18 +86,21 @@ export async function askTechHubChat({ projNumber, query, messages = [] }) {
 }
 
 /**
- * Resolve a short-lived signed URL for a cited source document.
- * Tech Hub resolves the storage path server-side from the doc id (the caller
- * never sends a raw path) and enforces per-project access.
+ * Download a cited source document through Tech Hub (server-side proxy).
+ *
+ * Tech Hub streams the bytes and re-validates access itself, so this works
+ * without signed URLs (which need a service-account private key the Cloud Run
+ * runtime does not have).
  *
  * @param {object} args
- * @param {string} args.projNumber  Project number (Tech Hub `projectId`).
- * @param {string} args.docId       Citation `doc_id`.
- * @returns {Promise<{url: string, filename: string}>}
+ * @param {string} args.projNumber   Project number (Tech Hub `projectId`).
+ * @param {string} args.storagePath  Citation `metadata.storage_path`.
+ * @param {string} [args.filename]   Display filename (for Content-Disposition).
+ * @returns {Promise<{blob: Blob, filename: string}>}
  */
-export async function getTechHubFileUrl({ projNumber, docId }) {
+export async function downloadTechHubFile({ projNumber, storagePath, filename }) {
   if (!projNumber) throw new TechHubChatError('Nomor proyek tidak tersedia.', 400);
-  if (!docId) throw new TechHubChatError('Dokumen sumber tidak tersedia.', 400);
+  if (!storagePath) throw new TechHubChatError('File sumber tidak tersedia.', 400);
 
   const user = auth.currentUser;
   if (!user) throw new TechHubChatError('Belum login.', 401);
@@ -113,9 +116,9 @@ export async function getTechHubFileUrl({ projNumber, docId }) {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        action: 'sign-doc-url',
+        action: 'download-file',
         projectId: projNumber,
-        metadata: { docId },
+        metadata: { storagePath, filename },
       }),
     });
   } catch {
@@ -129,7 +132,5 @@ export async function getTechHubFileUrl({ projNumber, docId }) {
     throw new TechHubChatError(errorMessageFor(res.status, msg), res.status);
   }
 
-  const data = await res.json();
-  if (!data?.url) throw new TechHubChatError('File sumber sudah tidak tersedia.', 404);
-  return { url: data.url, filename: data.filename || '' };
+  return { blob: await res.blob(), filename: filename || 'file' };
 }
