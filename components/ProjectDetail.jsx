@@ -721,11 +721,17 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
             <div className="ph-card">
               <div className="ph-card__head"><div className="ph-card__title">Related systems</div></div>
               <div className="flex flex-wrap gap-2">
-                <button onClick={() => post('GO_TO_CPC')} className="ph-btn ph-btn--ghost ph-btn--sm">CPC Quote</button>
-                <button onClick={() => post('GO_TO_SIMPLIFY')} className="ph-btn ph-btn--ghost ph-btn--sm">Simplify</button>
-                <button onClick={() => post('GO_TO_ISERVE')} className="ph-btn ph-btn--ghost ph-btn--sm">iServe</button>
+                {showExtActions && (
+                  <>
+                    <button onClick={() => post('GO_TO_CPC')} className="ph-btn ph-btn--ghost ph-btn--sm">CPC Quote</button>
+                    <button onClick={() => post('GO_TO_SIMPLIFY')} className="ph-btn ph-btn--ghost ph-btn--sm">Simplify</button>
+                    <button onClick={() => post('GO_TO_ISERVE')} className="ph-btn ph-btn--ghost ph-btn--sm">iServe</button>
+                  </>
+                )}
                 <button onClick={goTechHub} className="ph-btn ph-btn--ghost ph-btn--sm">Tech Hub</button>
-                <button onClick={() => post('GO_TO_DASHBOARD')} className="ph-btn ph-btn--ghost ph-btn--sm">Financials</button>
+                {showExtActions && (
+                  <button onClick={() => post('GO_TO_DASHBOARD')} className="ph-btn ph-btn--ghost ph-btn--sm">Financials</button>
+                )}
               </div>
             </div>
 
