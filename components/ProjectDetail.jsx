@@ -41,6 +41,8 @@ import {
 
 const money = (v) => formatShortNumber(safeParseFloat(v));
 const full = (v) => `Rp ${(safeParseFloat(v)).toLocaleString('en-US')}`;
+// Financials are stored in millions (Mio IDR); expand to full IDR to match project.value.
+const fullFin = (v) => full(safeParseFloat(v) * 1e6);
 
 const parseDate = (raw) => {
   if (!raw) return null;
@@ -390,9 +392,9 @@ const ProjectDetail = ({ project, isAdmin, onEdit, onDelete, onBack, laborBudget
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {[
             ['Contract Value', full(project.value)],
-            ['Cost Plan', full(finTotal.plan)],
-            ['Actual to date', full(finTotal.actual)],
-            ['Available', full(totalAv)]
+            ['Cost Plan', fullFin(finTotal.plan)],
+            ['Actual to date', fullFin(finTotal.actual)],
+            ['Available', fullFin(totalAv)]
           ].map(([label, val]) => (
             <div key={label} className="rounded-2xl bg-[var(--surface)] border border-[var(--line)] shadow-card px-4 py-3.5">
               <p className="text-[.64rem] font-extrabold text-muted2 uppercase tracking-[.12em]">{label}</p>
