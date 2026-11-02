@@ -128,8 +128,11 @@ const startOfToday = () => {
  * granularity). When both dates are unparseable the row is treated as valid so
  * a scrape format change cannot silently turn every lamp off; when only one
  * bound parses the missing bound is unbounded.
+ *
+ * Exported so callers (e.g. the Team card) can flag individual members as
+ * active/inactive using the same rule as the aggregate counter.
  */
-const isRowValid = (row, today) => {
+export const isRowValid = (row, today = startOfToday()) => {
   const s = parseDate(row.start);
   const e = parseDate(row.end);
   if (s === null && e === null) return true;

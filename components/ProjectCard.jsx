@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { collection, getDocs, query, where, db, COLLECTION_PATH } from '../utils/firebase';
 import { getStatusChipClass, getStatusDotColor, formatDisplayDate, formatShortNumber, safeParseFloat } from '../utils/formatting';
 import { parseNoteUpdates } from '../utils/parsers';
+import { isRowValid } from '../hooks/useMemberAssignments';
 
 import LaborBudgetBadge from './LaborBudgetBadge';
 import MemberAssignmentBadge from './MemberAssignmentBadge';
@@ -609,9 +610,10 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
                       {team.map(member => {
                         const isPM = (member.role || '').toLowerCase() === 'project manager';
                         const hasLetter = letters[String(member.npk)];
+                        const isActive = isRowValid(member);
                         return (
-                          <div key={member.id} className={`flex items-start gap-2.5 rounded-2xl border p-2.5 ${isPM ? 'bg-wine-soft/60 dark:bg-[var(--wine-soft)] border-transparent' : 'border-[var(--line)]'}`}>
-                            <span className="w-8 h-8 mt-0.5 rounded-full grid place-items-center font-display font-extrabold text-[.68rem] text-white shrink-0" style={{ background: 'linear-gradient(135deg, var(--wine-solid), var(--wine-solid-2))' }}>
+                          <div key={member.id} className={`flex items-start gap-2.5 rounded-2xl border p-2.5 ${isPM && isActive ? 'bg-wine-soft/60 dark:bg-[var(--wine-soft)] border-transparent' : 'border-[var(--line)]'} ${isActive ? '' : 'opacity-70'}`}>
+                            <span className="w-8 h-8 mt-0.5 rounded-full grid place-items-center font-display font-extrabold text-[.68rem] shrink-0" style={isActive ? { color: '#fff', background: 'linear-gradient(135deg, var(--wine-solid), var(--wine-solid-2))' } : { color: 'var(--muted2)', background: 'var(--surface-2)' }}>
                               {initials(member.name)}
                             </span>
                             <span className="min-w-0 flex-1 leading-tight">
@@ -621,6 +623,9 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
                                 <span className={`ph-chip shrink-0 text-[.58rem] uppercase tracking-wider ${member.type === 'D' ? 'ph-chip--blue' : member.type === 'S' ? 'ph-chip--orange' : 'ph-chip--ghost'}`}>
                                   {member.type === 'D' ? 'Dedicated' : member.type === 'S' ? 'Shared' : (member.type || '—')}
                                 </span>
+                                {!isActive && (
+                                  <span className="ph-chip ph-chip--ghost shrink-0 text-[.58rem] uppercase tracking-wider">Inactive</span>
+                                )}
                               </span>
                               <span className="block truncate text-[.7rem] text-muted mt-0.5">
                                 {member.role || '-'}{member.wbs || member.fullWbs ? ` · WBS ${member.wbs || member.fullWbs}` : ''}
