@@ -108,7 +108,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
   const [lastUpdatedFinancials, setLastUpdatedFinancials] = useState(null);
 
   const loadTeam = async () => {
-    if (teamLoaded || loadingTeam) return;
+    if (loadingTeam) return;
     setLoadingTeam(true);
     try {
       const teamRef = collection(db, COLLECTION_PATH, project.id, 'team');
@@ -163,7 +163,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
   };
 
   const loadFinancials = async () => {
-    if (finLoaded || loadingFinancials) return;
+    if (loadingFinancials) return;
     setLoadingFinancials(true);
     try {
       const financialsRef = collection(db, COLLECTION_PATH, project.id, 'financials');
@@ -490,6 +490,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
                 Financials (WBS)
               </span>
               <span className="ml-auto inline-flex items-center gap-3 text-[.76rem] text-muted whitespace-nowrap">
+                {loadingFinancials && finLoaded && <Loader2Icon className="h-3.5 w-3.5 animate-spin text-muted2" />}
                 <span>Plan <b className="text-ink dark:text-[var(--ink)]">{finLoaded ? money(finTotal.plan) : '—'}</b></span>
                 <span>Available <b className={finTotalAv < 0 ? 'text-red-600' : 'text-[var(--green)]'}>{finLoaded ? money(finTotalAv) : '—'}</b></span>
                 <ChevronDownIcon className={`h-4 w-4 text-muted2 transition-transform duration-300 ${finOpen ? 'rotate-180' : ''}`} />
@@ -588,6 +589,7 @@ const ProjectCard = ({ project, onEdit, onDelete, isAdmin, embedded = false, lab
                 Team
               </span>
               <span className="ml-auto inline-flex items-center gap-3 text-[.76rem] text-muted whitespace-nowrap">
+                {loadingTeam && teamLoaded && <Loader2Icon className="h-3.5 w-3.5 animate-spin text-muted2" />}
                 <span>{teamLoaded ? `${team.length} people · ${memberAssignment?.state === 'ready' ? memberAssignment.active : 0} active` : ''}</span>
                 <ChevronDownIcon className={`h-4 w-4 text-muted2 transition-transform duration-300 ${teamOpen ? 'rotate-180' : ''}`} />
               </span>
