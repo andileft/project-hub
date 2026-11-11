@@ -11,6 +11,7 @@ import {
   Rows3Icon,
   TableIcon
 } from './Icons';
+import { Wordmark, LogoIcon } from './Wordmark';
 
 const Header = ({
   activeTab,
@@ -32,12 +33,13 @@ const Header = ({
     <header className="sticky top-0 z-30 bg-[var(--surface)] backdrop-blur border-b border-[var(--line)]">
       <div className="mx-auto max-w-[1320px] px-4 py-3 flex flex-col lg:flex-row lg:items-center gap-3">
         <div className="flex items-center gap-4 min-w-0">
-          <a href="#" className="flex items-center gap-3 shrink-0" onClick={(e) => e.preventDefault()}>
-            <img src="logo-wine.png" alt="Project Hub" className="h-10 w-10 rounded-xl object-contain" />
-            <span className="leading-tight hidden sm:block">
-              <span className="block font-display font-extrabold text-lg tracking-tight text-ink dark:text-[var(--ink)]">Project Hub</span>
-              <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted2">AGIT · Internal PMO</span>
+          <a href="#" className="flex items-center shrink-0" onClick={(e) => e.preventDefault()}>
+            <Wordmark className="h-9 hidden dark:hidden sm:block" />
+            <span className="hidden dark:flex items-center gap-2.5">
+              <LogoIcon className="h-9 w-9" />
+              <span className="font-display font-extrabold text-lg tracking-tight text-[var(--ink)]">Project Hub</span>
             </span>
+            <LogoIcon className="h-9 w-9 sm:hidden dark:hidden" />
           </a>
           <span className="hidden lg:block w-px h-8 bg-[var(--line-2)]" />
           <nav className="ph-seg order-3 lg:order-none w-full lg:w-auto overflow-x-auto">

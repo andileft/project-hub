@@ -25,7 +25,7 @@ import {
 } from '../utils/firebase';
 import {
   Header, FilterBar, Toast, GroupedProjectList, ListViewToolbar, BackToTopButton, buildGroups,
-  ProjectTable, ProjectDetail
+  ProjectTable, ProjectDetail, Wordmark
 } from '../components';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { formatShortCurrency, formatShortNumber } from '../utils/formatting';
@@ -75,12 +75,10 @@ const LoginForm = ({ onLogin, isLoggingIn }) => {
   return (
     <div className="grid md:grid-cols-2 max-w-4xl w-full bg-[var(--surface)] border border-[var(--line)] rounded-hero shadow-panel overflow-hidden">
       <aside className="hidden md:flex flex-col gap-5 p-10 text-white relative" style={{ background: 'linear-gradient(135deg, var(--wine-solid), var(--wine-solid-2))' }}>
-        <div className="flex items-center gap-3">
-          <img src="logo-wine.png" alt="Project Hub" className="h-10 w-10 rounded-xl object-contain bg-white/10 p-1" />
-          <div className="leading-tight">
-            <div className="font-display font-extrabold text-lg tracking-tight">Project Hub</div>
-            <div className="text-[11px] font-semibold uppercase tracking-widest text-white/70">AGIT · Internal PMO</div>
-          </div>
+        <div className="flex items-center">
+          <span className="inline-flex items-center rounded-2xl bg-white px-4 py-2.5 shadow-sm">
+            <Wordmark className="h-8" />
+          </span>
         </div>
         <h1 className="font-display text-3xl font-extrabold leading-[1.05] tracking-tight mt-4">All projects, one source of truth.</h1>
         <p className="text-sm text-white/80 leading-relaxed">Contract value, mandays, labor budget, team, and SDHO documents — in one place, kept in sync across the systems you already use.</p>

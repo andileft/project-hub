@@ -18,6 +18,7 @@ export { default as LaborBudgetBadge } from './LaborBudgetBadge';
 export { default as MemberAssignmentBadge } from './MemberAssignmentBadge';
 export { default as EndDateBadge } from './EndDateBadge';
 export { default as Morph } from './Morph';
+export { default as Wordmark, LogoIcon } from './Wordmark';
 export { default as SkeletonLoader } from './SkeletonLoader';
 
 // Dashboard and ProjectModal are lazy loaded directly in App, so they are
